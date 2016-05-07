@@ -1,0 +1,16 @@
+.vs/
+GeneratedFiles/*
+Debug/*
+Release/*
+x64/*
+*.opensdf
+*.opendb
+*.sdf
+*.suo
+*.tlog
+*.obj
+*.exp
+*.lib
+*.pdb
+*.user
+*.db
