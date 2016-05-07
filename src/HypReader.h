@@ -5,23 +5,23 @@
 #include "WinTypes.h"
 #endif
 
+#include "ComUtils.h"
+
 #include <memory>
 #include <sstream>
 #include <vector>
 #include <QtWidgets/QDialog>
 
-#include "ComUtils.h"
-
 class DeviceLink;
 class QTextEdit;
 class QPushButton;
 
-class AtxReader : public QDialog
+class HypReader : public QDialog
 {
     Q_OBJECT
 public:
-    explicit AtxReader(QWidget* parent = nullptr);
-   ~AtxReader();
+    explicit HypReader(QWidget* parent = nullptr);
+   ~HypReader();
 
 signals:
     void MessageToDisplay(const QString& msg);
@@ -41,9 +41,9 @@ private:
     // These get called from DeviceLink worker thread.
     // They emit the data to be processed on UI thread.
     void DisplayMessage  (const QString& msg);
-    void ReceiveDataChunk(const DeviceLink::packet_t& data);
     void MarkSeriesEnd();
     void DownloadFinished(bool success);
+    void ReceiveDataChunk(const DeviceLink::packet_t& data);
 
 //data:
     std::unique_ptr<DeviceLink>       m_deviceReader;
@@ -63,7 +63,7 @@ private:
     static const size_t  RECORD_LENGTH = 26;
     static const QString BS;
 
-    static bool  kShowDownloadInstructions;
+    static bool  kAskForConfgirmation;
 };
 
 #endif // ATXREADER_H

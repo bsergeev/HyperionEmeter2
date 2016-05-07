@@ -1,30 +1,24 @@
-#include <cassert>
-#include <fstream>
-#include <iomanip> // std::setprecision
-#include <iostream>
+#include "HypReader.h"
+#include "CustomWidgets/YesNoDlg.h"
+#include "ComUtils.h"
 
 #include <QtGui>
-#include <QtWidgets/QProgressDialog>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QTextEdit>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QFileDialog>
 
-#include "HypReader.h"
-#include "CustomWidgets/YesNoDlg.h"
-#include "ComUtils.h"
+#include <cassert>
+#include <fstream>
+#include <iomanip> // std::setprecision
+#include <iostream>
 
 //static:
-bool  AtxReader::kShowDownloadInstructions = true;
-const QString AtxReader::BS = QChar(0x10);
-
-int16_t twoUChars2Int(uint8_t hi, uint8_t lo) {
-    const int16_t r = static_cast<int16_t>((hi << 8) | lo);
-    return r;
-}
+bool  HypReader::kAskForConfgirmation = true;
+const QString HypReader::BS = QChar(0x10);
 
 //------------------------------------------------------------------------------
-AtxReader::AtxReader(QWidget *parent)
+HypReader::HypReader(QWidget *parent)
     : QDialog(parent)
 {
     ReadSettings();
@@ -58,17 +52,17 @@ AtxReader::AtxReader(QWidget *parent)
 
     resize(QSize(1000, 750));
 
-    connect(this, &AtxReader::MessageToDisplay, this, &AtxReader::DisplayMessageFromReader);
-    connect(this, &AtxReader::SeriesEnded,      this, &AtxReader::EndSeries);
-    connect(this, &AtxReader::DownloadFinish,   this, &AtxReader::FinishDownload);
+    connect(this, &HypReader::MessageToDisplay, this, &HypReader::DisplayMessageFromReader);
+    connect(this, &HypReader::SeriesEnded,      this, &HypReader::EndSeries);
+    connect(this, &HypReader::DownloadFinish,   this, &HypReader::FinishDownload);
 }
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-AtxReader::~AtxReader()
+HypReader::~HypReader()
 {
     WriteSettings();
 }
 //------------------------------------------------------------------------------
-void AtxReader::DisplayMessageFromReader(const QString& msg)
+void HypReader::DisplayMessageFromReader(const QString& msg)
 {
     if (!msg.isEmpty()) {
         QString message = msg;
@@ -84,13 +78,17 @@ void AtxReader::DisplayMessageFromReader(const QString& msg)
     }
 }
 //------------------------------------------------------------------------------
-void AtxReader::EndSeries()
+void HypReader::EndSeries()
 {
     m_DownloadedData.push_back(std::vector<uint8_t>());
 }
 //------------------------------------------------------------------------------
-void AtxReader::FinishDownload(bool success)
+void HypReader::FinishDownload(bool success)
 {
+    auto twoUChars2Int = [](uint8_t hi, uint8_t lo) {
+        return static_cast<int16_t>((hi << 8) | lo);
+    };
+
     if (success)
     {
         m_cout = std::cout.rdbuf(m_coutStream.rdbuf());
@@ -139,53 +137,36 @@ void AtxReader::FinishDownload(bool success)
     m_DownloadBtn->setEnabled(true);
 }
 //------------------------------------------------------------------------------
-// This gets called from DeviceLink worker thread.
-void AtxReader::DisplayMessage(const QString& msg)
-{
-    emit MessageToDisplay(msg);
-}
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// This gets called from DeviceLink worker thread.
-void AtxReader::ReceiveDataChunk(const DeviceLink::packet_t& data)
+// These gets called from DeviceLink worker thread:
+void HypReader::DisplayMessage(const QString& m) { emit MessageToDisplay(m); }
+void HypReader::MarkSeriesEnd()                  { emit SeriesEnded(); }
+void HypReader::DownloadFinished(bool success)   { emit DownloadFinish(success); }
+
+void HypReader::ReceiveDataChunk(const DeviceLink::packet_t& data)
 {
     // Add this chunk to the main data vector
-    const uint8_t* const d = &data[0];
     std::vector<uint8_t>& sessionData = m_DownloadedData.back();
     const bool firstPoint = sessionData.empty();
-    sessionData.insert(sessionData.end(), d, d + data.size());
+    std::copy(data.begin(), data.end(), std::back_inserter(sessionData));
 
-    QString msg = (firstPoint)? QString("") : BS;
-    emit MessageToDisplay(msg + tr("Received point %1").arg(sessionData.size()/26));
-}
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// This gets called from DeviceLink worker thread.
-void AtxReader::MarkSeriesEnd()
-{
-    emit SeriesEnded();
-}
-// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-// This gets called from DeviceLink worker thread.
-void AtxReader::DownloadFinished(bool success)
-{
-    emit DownloadFinish(success);
+    emit MessageToDisplay(((firstPoint)? QString("") : BS) 
+                         + tr("Received point %1").arg(sessionData.size()/26));
 }
 //------------------------------------------------------------------------------
-void AtxReader::DownloadFromDevice()
+void HypReader::DownloadFromDevice()
 {
     bool download = true;
-    if (false) // kShowDownloadInstructions)
-    {
-        YesNoDlg dlg(tr("Model Download")
-                    , tr("To download a model from your transmitter, click Ok,<br>"
-                         "then click SYSTEM/18.DATA TRANSFER/(make sure TX -> PC is selected)/<br>"
-                         "ENTER/Yes on the TX.")
-                    , tr("Don't show this again")
-                    , true  // show Don't ask
-                    , QMessageBox::Ok | QMessageBox::Cancel
-                    , this );
-        download = (dlg.exec() == QDialog::Accepted);
-        kShowDownloadInstructions = !dlg.IsDontAskAgainSelected();
-    }
+    //if (kAskForConfgirmation)
+    //{
+    //    YesNoDlg dlg(tr("Data Download")
+    //                , tr("Blah, blah, blah")
+    //                , tr("Don't show this again")
+    //                , true  // show Don't ask
+    //                , QMessageBox::Ok | QMessageBox::Cancel
+    //                , this );
+    //    download = (dlg.exec() == QDialog::Accepted);
+    //    kAskForConfgirmation = !dlg.IsDontAskAgainSelected();
+    //}
     if (download)
     {
         m_DownloadBtn->setEnabled(false);
@@ -203,8 +184,21 @@ void AtxReader::DownloadFromDevice()
     }
 }
 //------------------------------------------------------------------------------
-void AtxReader::EraseDevice()
+void HypReader::EraseDevice()
 {
+    bool doErase = true;
+    if (kAskForConfgirmation) {
+        YesNoDlg dlg( tr("Erase")
+                    , tr("Do you really want to erase all the data?")
+                    , tr("Don't show this again")
+                    , true  // show Don't ask
+                    , QMessageBox::Yes | QMessageBox::No
+                    , this );
+        doErase = (dlg.exec() == QDialog::Accepted);
+        kAskForConfgirmation = !dlg.IsDontAskAgainSelected();
+    }
+    if (doErase)
+    {
         m_DownloadBtn->setEnabled(false);
 
         m_DownloadedData.clear();
@@ -217,34 +211,35 @@ void AtxReader::EraseDevice()
         m_deviceReader->ClearRecordings(); // start erasing (non-blocking call)
 
         m_textEdit->clear(); // prepare for process messages
+    }
 }
 //------------------------------------------------------------------------------
-void AtxReader::LoadFromFile()
+void HypReader::LoadFromFile()
 {
     // TBD
 }
 //------------------------------------------------------------------------------
-void AtxReader::SaveToFile()
+void HypReader::SaveToFile()
 {
     // TBD
 }
 //------------------------------------------------------------------------------
 // Two methods for reading and saving static variables and current window size/position
-void AtxReader::ReadSettings()
+void HypReader::ReadSettings()
 {
     static bool alreadyLoaded = false;
     if (!alreadyLoaded)
     {
         QSettings settings;
-        kShowDownloadInstructions = settings.value("ShowInstructions", kShowDownloadInstructions).toBool();
+        kAskForConfgirmation = settings.value("ShowInstructions", kAskForConfgirmation).toBool();
         alreadyLoaded = true;
     }
 }
 
-void AtxReader::WriteSettings()
+void HypReader::WriteSettings()
 {
     QSettings settings;
 
-    settings.setValue("ShowInstructions", kShowDownloadInstructions);
+    settings.setValue("ShowInstructions", kAskForConfgirmation);
 }
 //------------------------------------------------------------------------------
