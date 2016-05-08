@@ -46,7 +46,12 @@ HypReader::HypReader(QWidget *parent)
     lay1->addWidget(m_ClearMemoryBtn);
     lay1->addStretch( 1 );
 
-    QPushButton* pb = new QPushButton(tr("Close"));
+    QPushButton* pb = new QPushButton(tr(" Save recordings to file "));
+    connect(pb, &QPushButton::clicked, [this] { SaveToFile(); });
+    lay1->addWidget(pb);
+    lay1->addStretch(1);
+
+    pb = new QPushButton(tr("Close"));
     connect(pb, SIGNAL(clicked()), this, SLOT(reject()));
     lay1->addWidget( pb );
 
@@ -208,7 +213,23 @@ void HypReader::LoadFromFile()
 //------------------------------------------------------------------------------
 void HypReader::SaveToFile()
 {
-    // TBD
+    QString filter = tr("Tab Separated Values (*.tsv)");
+    QString title = tr("Save recordings to a file");
+    QString fileName = QFileDialog::getSaveFileName(this, title, ".", filter);
+    if (!fileName.isEmpty()) // empty name means 'Cancel' was hit
+    {
+        std::ofstream file(fileName.toStdString(), std::ios_base::out);
+        bool ok = (file.good() && file.is_open());
+        if (ok) {
+            for (auto& recording : m_recordings) {
+                file << recording << "\n";
+            }
+            ok = !file.fail();
+        }
+        if (!ok) {
+            QMessageBox::critical(this, "Save Error", "Saving the recording failed!");
+        }
+    }
 }
 //------------------------------------------------------------------------------
 // Two methods for reading and saving static variables and current window size/position

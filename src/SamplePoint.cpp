@@ -1,4 +1,7 @@
 #include "SamplePoint.h"
+#include "HypReader.h"
+
+#include <span.h>  // gsl::span
 
 #include <iomanip> // std::setprecision
 
