@@ -84,7 +84,7 @@ public:
             while (m_port->waitForReadyRead(20)) {
                 receivedData += m_port->readAll();
             }
-            if ((ok = ((int)size >= receivedData.size())) == true) {
+            if ((ok = (static_cast<int>(size) >= receivedData.size())) == true) {
                 memcpy(data, receivedData.constData(), receivedData.size());
                 if (timedOut != nullptr) {
                     *timedOut = false;
@@ -191,10 +191,11 @@ void DeviceLink::DownloadThreadFn()
             dataVec_t reply(1, 0);
             if (com->read(&reply[0], 1)) {
                 m_firmwareVersionX100 = reply[0];
-                SendMessage(tr("Detected %1%2 firmware v%3 on %4\n")
-                            .arg(DEVICE_NAME[(size_t)m_deviceType])
+                SendMessage(tr("Detected %1%2 firmware v%3.%4 on %5\n")
+                            .arg(DEVICE_NAME[static_cast<size_t>(m_deviceType)])
                             .arg((hasData) ? " with data" : "")
-                            .arg(m_firmwareVersionX100/100.0, 4, 'g', 4)
+                            .arg(m_firmwareVersionX100 / 100)
+                            .arg(m_firmwareVersionX100 % 100, 2, 10, QChar('0'))
                             .arg(portName));
             }
         }
@@ -240,14 +241,15 @@ void DeviceLink::DownloadThreadFn()
                 try {
                     ok = (firstPass)? com->write(START_DOWNLOAD) : com->write(CONTINUE_DOWNLOAD);
                     if (ok) {
-                        uint8_t reply[27] = { 0 };
-                        if ((ok = com->read(reply, 27, &timedOut)) == true)
+                        std::array<uint8_t, HypReader::RECORD_LENGTH + 1> reply;
+                        reply.fill( 0 );
+                        if ((ok = com->read(&reply[0], HypReader::RECORD_LENGTH + 1, &timedOut)) == true)
                         {
                             // Looks like QtSerialPort bug: the last two bytes are swapped...
-                            std::swap(reply[25], reply[26]);
+                            std::swap(reply[HypReader::RECORD_LENGTH-1], reply[HypReader::RECORD_LENGTH]);
 
-                            if ((ok = ChecksumOk<27>(reply)) == true) {
-                                ReceivePacket(*reinterpret_cast<packet_t*>(&reply[0]));
+                            if ((ok = ChecksumOk(reply)) == true) {
+                                ReceivePacket({ &reply[0], static_cast<int64_t>(HypReader::RECORD_LENGTH) });
                             } else {
                                 SendMessage(tr("Corrupt data (CRC failure)"));
                             }

@@ -13,7 +13,6 @@
 YesNoDlg::YesNoDlg( QString windowTitle
                   , QString question
                   , QString dontAskTxt
-                  , bool showDontAskAgain
                   , QMessageBox::StandardButtons buttons
                   , QWidget* parent )
         : QDialog( parent )
@@ -28,11 +27,11 @@ YesNoDlg::YesNoDlg( QString windowTitle
     txt->setWordWrap( true );
     layout->addWidget( txt );
 
-    if (showDontAskAgain)
+    if (!dontAskTxt.isEmpty())
     {
         layout->addSpacing(10);
         m_DontAskAgain_CkBx = new QCheckBox( this );
-        m_DontAskAgain_CkBx->setText( (dontAskTxt.isEmpty())? tr("Don't ask me again") : dontAskTxt );
+        m_DontAskAgain_CkBx->setText( dontAskTxt );
         m_DontAskAgain_CkBx->setCheckState( Qt::Unchecked );
         layout->addWidget( m_DontAskAgain_CkBx );
     }
@@ -41,11 +40,11 @@ YesNoDlg::YesNoDlg( QString windowTitle
     QHBoxLayout* lay1 = new QHBoxLayout;
     lay1->addStretch( 2 );
 
-    QPushButton* pb = 0;
+    QPushButton* pb = nullptr;
     if (buttons & QMessageBox::Yes  ||  buttons & QMessageBox::Ok)
     {
         pb = new QPushButton( (buttons & QMessageBox::Yes)? tr("Yes") : tr("Ok") );
-        connect( pb, SIGNAL(clicked()), SLOT(accept()) );
+        connect(pb, &QPushButton::clicked, this, &QDialog::accept);
         pb->setDefault (true);
         lay1->addWidget( pb );
 
@@ -55,7 +54,7 @@ YesNoDlg::YesNoDlg( QString windowTitle
     if (buttons & QMessageBox::No)
     {
         pb = new QPushButton( tr("No") );
-        connect( pb, SIGNAL(clicked()), this, SLOT(reject()) );
+        connect( pb, &QPushButton::clicked, this, &QDialog::reject);
         lay1->addWidget( pb );
     }
 
@@ -63,7 +62,7 @@ YesNoDlg::YesNoDlg( QString windowTitle
     {
         lay1->addStretch( 1 );
         pb = new QPushButton( tr("Cancel") );
-        connect( pb, SIGNAL(clicked()), this, SLOT(Cancelled()) );
+        connect(pb, &QPushButton::clicked, this, &YesNoDlg::Cancelled);
         lay1->addWidget( pb );
     }
 

@@ -17,7 +17,6 @@ public:
     YesNoDlg( QString windowTitle
             , QString question
             , QString dontAskTxt = QString()
-            , bool    showDontAskAgain = false
             , QMessageBox::StandardButtons = QMessageBox::Ok
             , QWidget* parent=0 );
     virtual ~YesNoDlg() {}
@@ -25,10 +24,10 @@ public:
     bool IsDontAskAgainSelected() const;
     bool WasCancelled() const { return m_Cancelled; }
 
-private slots:
+private:
     void Cancelled();
 
-private:
+//private data:
     QCheckBox* m_DontAskAgain_CkBx;
     bool       m_Cancelled;
 };

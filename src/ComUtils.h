@@ -1,6 +1,10 @@
 #ifndef COMUTILS_H
 #define	COMUTILS_H
 
+#include "HypReader.h" // RECORD_LENGTH
+
+#include <span.h>      // gsl::span
+
 #include <array>
 #include <functional>
 #include <memory>
@@ -28,9 +32,9 @@ public:
         LDU, RDU, MDU,
         NUM_TYPES // the last
     };
-    typedef std::array<uint8_t, 26>  packet_t; // 16 = PACKET_SIZE
     typedef std::function<void(const QString&)>  MsgToDisplayCbk;
-    typedef std::function<void(const packet_t&)> PacketRecvdCbk;
+    typedef std::function<void(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>&)> 
+                                                 PacketRecvdCbk;
     typedef std::function<void()>                SeriesEndCbk;
     typedef std::function<void(bool)>            FinishedCbk;
 
@@ -48,19 +52,16 @@ private:
 
     std::unique_ptr<SerialPort> EstablishConnection(size_t& port_idx, uint8_t& handshakeReply);
 
-    void SendMessage(const QString& msg) const { if (m_messageCbk)     m_messageCbk(msg); }
-    void ReceivePacket (const packet_t& p)const{ if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
-    void SendFinished(bool ok)           const { if (m_finishCbk)      m_finishCbk(ok); }
+    void SendMessage  (const QString& msg) const { if (m_messageCbk)     m_messageCbk(msg); }
+    void ReceivePacket(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>& p)const { if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
+    void SendFinished (bool ok)            const { if (m_finishCbk)      m_finishCbk(ok); }
 
     typedef std::vector<uint8_t> dataVec_t;
 
-    template<size_t N> static bool ChecksumOk(uint8_t* data) {
+    template<size_t N> static bool ChecksumOk(const std::array<uint8_t, N>& data) {
         size_t sum = 0;
-        for (size_t i = 0;  i + 1 < N;  ++i) {
-            sum += data[i];
-        }
-        const bool ok = ((sum & 0xFF) == data[N - 1]);
-        return ok;
+        for (size_t i=0;  i+1 < N;  sum += data[i++]);
+        return ((sum & 0xFF) == data[N - 1]);
     }
 
 //data:

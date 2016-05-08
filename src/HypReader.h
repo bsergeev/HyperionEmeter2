@@ -5,11 +5,12 @@
 #include "WinTypes.h"
 #endif
 
-#include "ComUtils.h"
-
 #include <memory>
 #include <sstream>
 #include <vector>
+
+#include <span.h>      // gsl::span
+
 #include <QtWidgets/QDialog>
 
 class DeviceLink;
@@ -24,6 +25,8 @@ class HypReader : public QDialog
 public:
     explicit HypReader(QWidget* parent = nullptr);
    ~HypReader();
+
+   static const size_t RECORD_LENGTH = 26;
 
 signals:
     void MessageToDisplay(const QString& msg);
@@ -45,7 +48,7 @@ private:
     void DisplayMessage  (const QString& msg);
     void MarkSeriesEnd();
     void DownloadFinished(bool success);
-    void ReceiveDataChunk(const DeviceLink::packet_t& data);
+    void ReceiveDataChunk(const gsl::span<uint8_t, RECORD_LENGTH>& data);
 
 //data:
     std::unique_ptr<DeviceLink>       m_deviceReader;
@@ -66,9 +69,6 @@ private:
 //static data:
     static const QString BS;
     static bool  kAskForConfgirmation;
-
-public:
-    static const size_t  RECORD_LENGTH = 26;
 };
 
 #endif // ATXREADER_H

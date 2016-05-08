@@ -1,8 +1,7 @@
 #pragma once
 
 #include <stdint.h>
-#include <span.h>      // span
-
+#include <span.h>      // gsl::span
 #include "HypReader.h" // RECORD_LENGTH
 
 class SamplePoint {
