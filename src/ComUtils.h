@@ -63,21 +63,6 @@ private:
         return ok;
     }
 
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // A utility class to automatically call FinishedCbk on destruction.
-    class FinishCaller 
-    {
-        FinishCaller()                               = delete;
-        FinishCaller(const FinishCaller&)            = delete;
-        FinishCaller operator =(const FinishCaller&) = delete;
-    public:
-        FinishCaller(FinishedCbk cb, bool& ok) : m_cbkFn(cb), m_result(ok) {}
-        ~FinishCaller() { if (m_cbkFn) m_cbkFn(m_result); }
-    private:
-        FinishedCbk m_cbkFn;
-        bool&       m_result;
-    };
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //data:
     MsgToDisplayCbk m_messageCbk;
     PacketRecvdCbk  m_packetRecvdCbk; 

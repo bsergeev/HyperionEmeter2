@@ -6,6 +6,8 @@
 #include <iostream>
 #include <iomanip>
 
+#include <gsl_util.h> // finally
+
 #include "ComUtils.h"
 
 #include <QDebug>
@@ -153,7 +155,7 @@ void DeviceLink::UploadToDevice(const std::vector<uint8_t>& data)
 void DeviceLink::DownloadThreadFn()
 {
     bool ok = false;
-    FinishCaller call_on_exit(m_finishCbk, ok);
+    auto return_ok_on_exit = gsl::finally([this, &ok](){ if (m_finishCbk) m_finishCbk(ok); });
 
     // Find a compatible device
     SendMessage(tr("Looking for a device..."));
@@ -273,7 +275,7 @@ void DeviceLink::DownloadThreadFn()
 void DeviceLink::ClearThreadFn()
 {
     bool ok = false;
-    FinishCaller call_on_exit(m_finishCbk, ok);
+    auto return_ok_on_exit = gsl::finally([this, &ok](){ if (m_finishCbk) m_finishCbk(ok); });
 
     // Find a compatible device
     SendMessage(tr("Looking for a device..."));

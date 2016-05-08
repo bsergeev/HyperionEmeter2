@@ -13,6 +13,8 @@
 #include <QtWidgets/QDialog>
 
 class DeviceLink;
+class Recording;
+
 class QTextEdit;
 class QPushButton;
 
@@ -47,7 +49,9 @@ private:
 
 //data:
     std::unique_ptr<DeviceLink>       m_deviceReader;
-    std::vector<std::vector<uint8_t>> m_DownloadedData;
+    std::vector<std::vector<uint8_t>> m_downloadedRawData;
+
+    std::vector<Recording> m_recordings;
 
     std::stringstream m_coutStream;
     std::streambuf*   m_cout        = nullptr;
@@ -60,10 +64,11 @@ private:
     static void WriteSettings();
 
 //static data:
-    static const size_t  RECORD_LENGTH = 26;
     static const QString BS;
-
     static bool  kAskForConfgirmation;
+
+public:
+    static const size_t  RECORD_LENGTH = 26;
 };
 
 #endif // ATXREADER_H

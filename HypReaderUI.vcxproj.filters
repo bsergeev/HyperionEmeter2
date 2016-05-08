@@ -65,6 +65,12 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_YesNoDlg.cpp">
       <Filter>Generated Files\Debug</Filter>
     </ClCompile>
+    <ClCompile Include="src\Recording.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SamplePoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\ComUtils.h">
@@ -81,6 +87,12 @@
     <ClInclude Include="src\WinTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Recording.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\SamplePoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HypReader.rc" />
@@ -89,5 +101,8 @@
     <Image Include="icon1.ico">
       <Filter>Resources</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
