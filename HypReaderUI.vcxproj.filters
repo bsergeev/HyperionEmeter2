@@ -93,6 +93,9 @@
     <ClInclude Include="src\SamplePoint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\HypCommands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="HypReader.rc" />

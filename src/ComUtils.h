@@ -1,7 +1,7 @@
 #ifndef COMUTILS_H
 #define	COMUTILS_H
 
-#include "HypReader.h" // RECORD_LENGTH
+#include "HypCommands.h" // RECORD_LENGTH
 
 #include <span.h>      // gsl::span
 
@@ -33,7 +33,7 @@ public:
         NUM_TYPES // the last
     };
     typedef std::function<void(const QString&)>  MsgToDisplayCbk;
-    typedef std::function<void(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>&)> 
+    typedef std::function<void(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>&)> 
                                                  PacketRecvdCbk;
     typedef std::function<void()>                SeriesEndCbk;
     typedef std::function<void(bool)>            FinishedCbk;
@@ -53,7 +53,7 @@ private:
     std::unique_ptr<SerialPort> EstablishConnection(size_t& port_idx, uint8_t& handshakeReply);
 
     void SendMessage  (const QString& msg) const { if (m_messageCbk)     m_messageCbk(msg); }
-    void ReceivePacket(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>& p)const { if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
+    void ReceivePacket(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& p)const { if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
     void SendFinished (bool ok)            const { if (m_finishCbk)      m_finishCbk(ok); }
 
     typedef std::vector<uint8_t> dataVec_t;

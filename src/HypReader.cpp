@@ -104,15 +104,15 @@ void HypReader::FinishDownload(bool success)
         for (auto& sessionData : m_downloadedRawData)
         {
             const size_t DATA_SIZE = sessionData.size();
-            assert(DATA_SIZE % RECORD_LENGTH == 0);
+            assert(DATA_SIZE % Hyperion::RECORD_LENGTH == 0);
 
             std::vector<SamplePoint> points;
-            points.reserve(DATA_SIZE / RECORD_LENGTH);
+            points.reserve(DATA_SIZE / Hyperion::RECORD_LENGTH);
 
             Recording::PrintDivider(std::cout);
-            for (size_t recordAddr = 0;  recordAddr + RECORD_LENGTH - 1 < DATA_SIZE;  recordAddr += RECORD_LENGTH)
+            for (size_t recordAddr = 0;  recordAddr + Hyperion::RECORD_LENGTH - 1 < DATA_SIZE;  recordAddr += Hyperion::RECORD_LENGTH)
             {
-                auto point = SamplePoint({ &sessionData[recordAddr], static_cast<int64_t>(RECORD_LENGTH) });
+                auto point = SamplePoint({ &sessionData[recordAddr], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
                 std::cout << point << "\n";
                 points.push_back(point);
             }
@@ -133,7 +133,7 @@ void HypReader::DisplayMessage(const QString& m) { emit MessageToDisplay(m); }
 void HypReader::MarkSeriesEnd()                  { emit SeriesEnded();       }
 void HypReader::DownloadFinished(bool ok)        { emit DownloadFinish(ok);  }
 
-void HypReader::ReceiveDataChunk(const gsl::span<uint8_t, RECORD_LENGTH>& data)
+void HypReader::ReceiveDataChunk(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data)
 {
     // Add this chunk to the main data vector
     std::vector<uint8_t>& sessionData = m_downloadedRawData.back();
@@ -141,7 +141,7 @@ void HypReader::ReceiveDataChunk(const gsl::span<uint8_t, RECORD_LENGTH>& data)
     std::copy(data.begin(), data.end(), std::back_inserter(sessionData));
 
     emit MessageToDisplay(((firstPoint)? QString("") : BS) 
-                         + tr("Received point %1").arg(sessionData.size()/RECORD_LENGTH));
+                         + tr("Received point %1").arg(sessionData.size()/Hyperion::RECORD_LENGTH));
 }
 //------------------------------------------------------------------------------
 void HypReader::DownloadFromDevice()
@@ -166,7 +166,7 @@ void HypReader::DownloadFromDevice()
         m_downloadedRawData.push_back(std::vector<uint8_t>());
 
         m_deviceReader.reset(new DeviceLink([this](const QString&  msg){ DisplayMessage(msg);  },
-                               [this](const gsl::span<uint8_t, RECORD_LENGTH>& p) { ReceiveDataChunk(p); },
+                               [this](const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& p) { ReceiveDataChunk(p); },
                                [this]()                                { MarkSeriesEnd();      },
                                [this](bool ok)                         { DownloadFinished(ok); }));
         m_deviceReader->DownloadRecorded(); // start downloading (non-blocking call)
@@ -195,7 +195,7 @@ void HypReader::EraseDevice()
         m_downloadedRawData.push_back(std::vector<uint8_t>());
 
         m_deviceReader.reset(new DeviceLink([this](const QString&  msg)         { DisplayMessage(msg);  },
-                                            [this](const gsl::span<uint8_t, RECORD_LENGTH>&) {          },
+                                            [this](const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>&) {          },
                                             [this]()                            { MarkSeriesEnd();      },
                                             [this](bool ok)                     { DownloadFinished(ok); }));
         m_deviceReader->ClearRecordings(); // start erasing (non-blocking call)

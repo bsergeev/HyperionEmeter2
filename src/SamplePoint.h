@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdint.h>
-#include <span.h>      // gsl::span
-#include "HypReader.h" // RECORD_LENGTH
+#include <span.h>        // gsl::span
+#include "HypCommands.h" // RECORD_LENGTH
 
 class SamplePoint {
     friend std::ostream& operator <<(std::ostream& os, const SamplePoint& obj);
 public:
-    SamplePoint(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>& data);
+    SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
 private:
     double seconds;
     double volts;

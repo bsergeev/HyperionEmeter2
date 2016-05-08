@@ -5,7 +5,7 @@
 
 #include <iomanip> // std::setprecision
 
-SamplePoint::SamplePoint(const gsl::span<uint8_t, HypReader::RECORD_LENGTH>& data)
+SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data)
 {
     assert(data.data() != nullptr);
 

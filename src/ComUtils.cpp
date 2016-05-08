@@ -241,15 +241,15 @@ void DeviceLink::DownloadThreadFn()
                 try {
                     ok = (firstPass)? com->write(START_DOWNLOAD) : com->write(CONTINUE_DOWNLOAD);
                     if (ok) {
-                        std::array<uint8_t, HypReader::RECORD_LENGTH + 1> reply;
+                        std::array<uint8_t, Hyperion::RECORD_LENGTH + 1> reply;
                         reply.fill( 0 );
-                        if ((ok = com->read(&reply[0], HypReader::RECORD_LENGTH + 1, &timedOut)) == true)
+                        if ((ok = com->read(&reply[0], Hyperion::RECORD_LENGTH + 1, &timedOut)) == true)
                         {
                             // Looks like QtSerialPort bug: the last two bytes are swapped...
-                            std::swap(reply[HypReader::RECORD_LENGTH-1], reply[HypReader::RECORD_LENGTH]);
+                            std::swap(reply[Hyperion::RECORD_LENGTH-1], reply[Hyperion::RECORD_LENGTH]);
 
                             if ((ok = ChecksumOk(reply)) == true) {
-                                ReceivePacket({ &reply[0], static_cast<int64_t>(HypReader::RECORD_LENGTH) });
+                                ReceivePacket({ &reply[0], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
                             } else {
                                 SendMessage(tr("Corrupt data (CRC failure)"));
                             }
