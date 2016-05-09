@@ -13,34 +13,35 @@ SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data
         return static_cast<int16_t>((hi << 8) | lo);
     };
 
-    volts    = twoUChars2Int(data[0],  data[ 1]) / 100.0;
-    amps     = twoUChars2Int(data[2],  data[ 3]) / 100.0;
-    mAhOut   = twoUChars2Int(data[4],  data[ 5]);
-    mAhIn    = twoUChars2Int(data[6],  data[ 7]);
-    RPM      = twoUChars2Int(data[8],  data[ 9]);
-    seconds  = twoUChars2Int(data[10], data[11]);
-    altitude = twoUChars2Int(data[12], data[13]);        // <<< TBD: verify negative?
-    temp1    = twoUChars2Int(data[14], data[15]) / 10.0;
-    temp2    = twoUChars2Int(data[16], data[17]) / 10.0;
-    temp3    = twoUChars2Int(data[18], data[19]) / 10.0;
-    throttle = twoUChars2Int(data[20], data[21]);
-    tempAmb  = twoUChars2Int(data[22], data[23]) / 10.0; // <<< TBD: verify negative
+    m_values[ut(ValueIndex::volts)   ] = twoUChars2Int(data[0],  data[ 1]) / 100.0;
+    m_values[ut(ValueIndex::amps)    ] = twoUChars2Int(data[2],  data[ 3]) / 100.0;
+    m_values[ut(ValueIndex::mAh_Out) ] = twoUChars2Int(data[4],  data[ 5]);
+    m_values[ut(ValueIndex::mAh_In)  ] = twoUChars2Int(data[6],  data[ 7]);
+    m_values[ut(ValueIndex::RPM)     ] = twoUChars2Int(data[8],  data[ 9]);
+    m_values[ut(ValueIndex::seconds) ] = twoUChars2Int(data[10], data[11]);
+    m_values[ut(ValueIndex::altitude)] = twoUChars2Int(data[12], data[13]);        // TODO: verify negative?
+    m_values[ut(ValueIndex::temp1)   ] = twoUChars2Int(data[14], data[15]) / 10.0;
+    m_values[ut(ValueIndex::temp2)   ] = twoUChars2Int(data[16], data[17]) / 10.0;
+    m_values[ut(ValueIndex::temp3)   ] = twoUChars2Int(data[18], data[19]) / 10.0;
+    m_values[ut(ValueIndex::throttle)] = twoUChars2Int(data[20], data[21]);
+    m_values[ut(ValueIndex::tempAmb) ] = twoUChars2Int(data[22], data[23]) / 10.0; // TODO: verify negative
 }
 
 std::ostream& operator <<(std::ostream& os, const SamplePoint& r)
 {
     static const char* s = "\t"; // separator
-    os << std::fixed << std::setprecision(2) << r.seconds  << s 
-       << std::fixed << std::setprecision(2) << r.volts    << s
-       << std::fixed << std::setprecision(2) << r.amps     << s
-       << std::fixed << std::setprecision(0) << r.mAhOut   << s
-       << std::fixed << std::setprecision(0) << r.mAhIn    << s
-       << std::fixed << std::setprecision(0) << r.RPM      << s
-       << std::fixed << std::setprecision(0) << r.altitude << s
-       << std::fixed << std::setprecision(1) << r.temp1    << s
-       << std::fixed << std::setprecision(1) << r.temp2    << s
-       << std::fixed << std::setprecision(1) << r.temp3    << s
-       << std::fixed << std::setprecision(0) << r.throttle << s
-       << std::fixed << std::setprecision(1) << r.tempAmb;
+    using vi = SamplePoint::ValueIndex;
+    os << std::fixed << std::setprecision(2) << r[vi::seconds ] << s
+       << std::fixed << std::setprecision(2) << r[vi::volts   ] << s
+       << std::fixed << std::setprecision(2) << r[vi::amps    ] << s
+       << std::fixed << std::setprecision(0) << r[vi::mAh_Out ] << s
+       << std::fixed << std::setprecision(0) << r[vi::mAh_In  ] << s
+       << std::fixed << std::setprecision(0) << r[vi::RPM     ] << s
+       << std::fixed << std::setprecision(0) << r[vi::altitude] << s
+       << std::fixed << std::setprecision(1) << r[vi::temp2   ] << s
+       << std::fixed << std::setprecision(1) << r[vi::temp3   ] << s
+       << std::fixed << std::setprecision(1) << r[vi::temp1   ] << s
+       << std::fixed << std::setprecision(0) << r[vi::throttle] << s
+       << std::fixed << std::setprecision(1) << r[vi::tempAmb ];
     return os;
 }

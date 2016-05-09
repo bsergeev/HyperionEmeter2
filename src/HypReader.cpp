@@ -110,14 +110,15 @@ void HypReader::FinishDownload(bool success)
             points.reserve(DATA_SIZE / Hyperion::RECORD_LENGTH);
 
             Recording::PrintDivider(std::cout);
-            for (size_t recordAddr = 0;  recordAddr + Hyperion::RECORD_LENGTH - 1 < DATA_SIZE;  recordAddr += Hyperion::RECORD_LENGTH)
-            {
-                auto point = SamplePoint({ &sessionData[recordAddr], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
-                std::cout << point << "\n";
-                points.push_back(point);
+            for (size_t recordAddr=0; recordAddr+Hyperion::RECORD_LENGTH-1 < DATA_SIZE; recordAddr += Hyperion::RECORD_LENGTH) {
+                points.emplace_back(gsl::span<uint8_t, Hyperion::RECORD_LENGTH>
+                                    { &sessionData[recordAddr], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
             }
 
             m_recordings.emplace_back(Recording{ std::move(points) });
+            m_recordings.back().MassageData();
+
+            std::cout << m_recordings.back();
         }
         m_textEdit->clear();
         m_textEdit->setText(QString::fromStdString(m_coutStream.str()));

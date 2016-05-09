@@ -11,6 +11,8 @@ class Recording
 public:
     Recording(std::vector<SamplePoint>&& points);
 
+    bool MassageData(); // return whether anything was changed
+
     static void PrintHeader (std::ostream& os);
     static void PrintDivider(std::ostream& os);
 
