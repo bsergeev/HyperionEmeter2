@@ -9,6 +9,13 @@ Recording::Recording(std::vector<SamplePoint>&& points)
 // return whether anything was changed
 bool Recording::MassageData()
 {
+    using vi = SamplePoint::ValueIndex;
+
+    const size_t N_points = m_points.size();
+    if (N_points == 0) {
+        return false; // nothing to do
+    }
+
     bool changed = false;
 
     // First, check if the sample rate is less than a second, thus several
@@ -18,7 +25,7 @@ bool Recording::MassageData()
         size_t same_seconds_inarow = 1;
         double prev_seconds = -1.0; // not set
         for (const SamplePoint& pt : m_points) {
-            const double& seconds = pt[SamplePoint::ValueIndex::seconds];
+            const double& seconds = pt[vi::seconds];
             if (prev_seconds >= 0.0) {
                 if (prev_seconds == seconds) {
                     ++same_seconds_inarow;
@@ -36,8 +43,6 @@ bool Recording::MassageData()
     }
     if (max_same_seconds_inarow > 1) 
     {
-        const size_t N_points = m_points.size();
-
         // Occasionally, very short sequences don't have a full sub-sequence
         if (max_same_seconds_inarow == 3 && N_points < 7) {
             max_same_seconds_inarow = 4;
@@ -49,13 +54,14 @@ bool Recording::MassageData()
         size_t prev_sec_idx = 0;
         for (size_t i = 0; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
-            const double& seconds = pt[SamplePoint::ValueIndex::seconds];
+            const double& seconds = pt[vi::seconds];
             if (prev_seconds >= 0.0) {
                 if (prev_seconds != seconds) { // value just changed
                     if (prev_sec_idx + 1 < i) {
+                        changed = true;
                         const double s0 = seconds - (i - prev_sec_idx)*ds;
                         for (size_t j = prev_sec_idx; j < i; ++j) {
-                            m_points[j][SamplePoint::ValueIndex::seconds] =
+                            m_points[j][vi::seconds] =
                                 s0 + ds*(j - prev_sec_idx);
                         }
                     }
@@ -67,13 +73,29 @@ bool Recording::MassageData()
             }
         }
         if (prev_sec_idx + 1 < N_points) {
-            const double s0 = m_points[prev_sec_idx][SamplePoint::ValueIndex::seconds];
+            changed = true;
+            const double s0 = m_points[prev_sec_idx][vi::seconds];
             for (size_t j = prev_sec_idx+1; j < N_points; ++j) {
-                m_points[j][SamplePoint::ValueIndex::seconds] =
+                m_points[j][vi::seconds] =
                     s0 + ds*(j - prev_sec_idx);
             }
         }
-   }
+    }
+
+    // Next, record more accurate discharge values
+    const SamplePoint& pt0 = m_points.front();
+    double discharged = pt0[vi::mAh_Out];
+    double prev_amps  = pt0[vi::amps];
+    const double dt = (N_points > 1)? m_points[1][vi::seconds] - pt0[vi::seconds]
+                                    : 0.0;
+    for (size_t i = 1; i < N_points; ++i) {
+        SamplePoint& pt = m_points[i];
+        const double orig_discharge = pt[vi::mAh_Out];
+        const double& amps = pt[vi::amps];
+        pt[vi::mAh_Out] = discharged += 0.5*(prev_amps + amps)*dt;
+        changed |= (orig_discharge != pt[vi::mAh_Out]);
+        prev_amps = amps;
+    }
     return changed;
 }
 

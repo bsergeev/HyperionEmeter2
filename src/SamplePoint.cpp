@@ -34,7 +34,7 @@ std::ostream& operator <<(std::ostream& os, const SamplePoint& r)
     os << std::fixed << std::setprecision(2) << r[vi::seconds ] << s
        << std::fixed << std::setprecision(2) << r[vi::volts   ] << s
        << std::fixed << std::setprecision(2) << r[vi::amps    ] << s
-       << std::fixed << std::setprecision(0) << r[vi::mAh_Out ] << s
+       << std::fixed << std::setprecision(2) << r[vi::mAh_Out ] << s
        << std::fixed << std::setprecision(0) << r[vi::mAh_In  ] << s
        << std::fixed << std::setprecision(0) << r[vi::RPM     ] << s
        << std::fixed << std::setprecision(0) << r[vi::altitude] << s
