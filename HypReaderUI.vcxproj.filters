@@ -53,12 +53,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ComUtils.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_HypReader.cpp">
-      <Filter>Generated Files\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_HypReader.cpp">
-      <Filter>Generated Files\Release</Filter>
-    </ClCompile>
     <ClCompile Include="src\HypReader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,6 +65,15 @@
     <ClCompile Include="src\SamplePoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\MainWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_MainWnd.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_MainWnd.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\ComUtils.h">
@@ -81,6 +84,9 @@
     </CustomBuild>
     <CustomBuild Include="src\CustomWidgets\YesNoDlg.h">
       <Filter>Header Files\CustomWidgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\MainWnd.h">
+      <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

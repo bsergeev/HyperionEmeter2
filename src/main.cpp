@@ -1,4 +1,4 @@
-#include "HypReader.h"
+#include "MainWnd.h"
 #include <QtWidgets/QApplication>
 
 int main(int argc, char *argv[])
@@ -15,7 +15,9 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("milehighwings.com");
     QCoreApplication::setApplicationName("HyperionReader");
 
-    HypReader w;
+    MainWnd w;
     w.show();
-    return a.exec();
+
+    const auto result = a.exec();
+    return result;
 }
