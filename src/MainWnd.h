@@ -2,7 +2,7 @@
 
 #include "HypReader.h"
 
-#include <QtWidgets/QMainWindow>
+#include <QMainWindow>
 #include <memory>
 
 class QWidget;

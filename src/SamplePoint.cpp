@@ -1,8 +1,6 @@
 #include "SamplePoint.h"
 #include "HypReader.h"
 
-#include <span.h>  // gsl::span
-
 #include <iomanip> // std::setprecision
 
 SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data)

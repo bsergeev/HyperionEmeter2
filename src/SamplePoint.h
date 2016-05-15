@@ -1,12 +1,13 @@
 #pragma once
 
+#include <iosfwd>
 #include <stdint.h>
 #include <type_traits>
 
 #include <span.h>        // gsl::span
 #include "HypCommands.h" // RECORD_LENGTH
 
-// Utility constexpr function coverting a enum class to its underlying type
+// Utility constexpr function converting a enum class to its underlying type
 template <typename E,
           typename = std::enable_if_t<std::is_enum<E>::value>>
 constexpr auto ut(E e) noexcept

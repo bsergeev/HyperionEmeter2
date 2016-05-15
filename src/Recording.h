@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include <iosfwd>
 #include <vector>
 
 class SamplePoint;
@@ -17,7 +17,7 @@ public:
     static void PrintDivider(std::ostream& os);
 
 private:
-    std::vector <SamplePoint> m_points;
+    std::vector<SamplePoint> m_points;
 };
 
 std::ostream& operator <<(std::ostream& os, const Recording& obj);
