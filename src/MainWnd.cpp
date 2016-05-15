@@ -12,7 +12,6 @@ MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
     , m_reader(std::make_unique<HypReader>([this](const QString& s){ DisplayMessage(s); }, this))
     , m_mdiArea  (new QMdiArea)
-    , m_logWindow(new LogWindow(this))
 {
     m_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_mdiArea->setVerticalScrollBarPolicy  (Qt::ScrollBarAsNeeded);
