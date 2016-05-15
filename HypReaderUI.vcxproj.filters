@@ -74,12 +74,27 @@
     <ClCompile Include="GeneratedFiles\Release\moc_MainWnd.cpp">
       <Filter>Generated Files\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_resources.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LogWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_LogWindow.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_LogWindow.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_HypReader.cpp">
+      <Filter>Generated Files\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_HypReader.cpp">
+      <Filter>Generated Files\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\ComUtils.h">
-      <Filter>Header Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="src\HypReader.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\CustomWidgets\YesNoDlg.h">
@@ -88,11 +103,11 @@
     <CustomBuild Include="src\MainWnd.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
+    <CustomBuild Include="resources.qrc">
+      <Filter>Resources</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\WinTypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Recording.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -102,16 +117,36 @@
     <ClInclude Include="src\HypCommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="HypReader.rc" />
+    <ClInclude Include="src\HypReader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\LogWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="icon1.ico">
       <Filter>Resources</Filter>
     </Image>
+    <Image Include="images\toolbars\button_open.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="images\toolbars\button_save.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="images\toolbars\button_download.png">
+      <Filter>Resources</Filter>
+    </Image>
+    <Image Include="images\toolbars\button_erase.png">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HypReader.rc">
+      <Filter>Resources</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
