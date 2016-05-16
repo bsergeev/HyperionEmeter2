@@ -97,12 +97,12 @@ void HypReader::EraseDevice()
 
     m_deviceReader.reset(new DeviceLink(m_msgCBck,
                                [this](const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>&) {},
-                               [this]()        {},
-                               [this](bool ok) {}));
+                               [this]()     {},
+                               [this](bool) {}));
     m_deviceReader->ClearRecordings(); // start erasing (non-blocking call)
 }
 //------------------------------------------------------------------------------
-bool HypReader::LoadFromFile(const QString& filePath)
+bool HypReader::LoadFromFile(const QString&)// filePath)
 {
     // TBD
     return false;

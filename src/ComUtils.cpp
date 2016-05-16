@@ -146,7 +146,7 @@ void DeviceLink::ClearRecordings()
     WorkerThread::Start(this, [this]{ ClearThreadFn(); });
 }
 //------------------------------------------------------------------------------
-void DeviceLink::UploadToDevice(const std::vector<uint8_t>& data)
+void DeviceLink::UploadToDevice(const std::vector<uint8_t>&)// data)
 {
     // TBD
 }

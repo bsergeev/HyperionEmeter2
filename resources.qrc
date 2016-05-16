@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/" >
+    <file>images/face-smile.png</file>
     <file>images/toolbars/button_download.png</file>
     <file>images/toolbars/button_erase.png</file>
     <file>images/toolbars/button_open.png</file>

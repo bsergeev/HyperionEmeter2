@@ -7,7 +7,7 @@ class LogWindow: public QTextEdit
     Q_OBJECT
 
 public:
-    LogWindow(QWidget* parent = 0);
+    explicit LogWindow(QWidget* parent = 0);
 
     void AddLine(const QString& text);
 

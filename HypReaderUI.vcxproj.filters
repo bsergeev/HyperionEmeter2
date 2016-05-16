@@ -140,6 +140,9 @@
     <Image Include="images\toolbars\button_erase.png">
       <Filter>Resources</Filter>
     </Image>
+    <Image Include="images\face-smile.png">
+      <Filter>Resources</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

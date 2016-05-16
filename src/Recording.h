@@ -9,7 +9,7 @@
 class Recording 
 {
 public:
-    Recording(std::vector<SamplePoint>&& points);
+    explicit Recording(std::vector<SamplePoint>&& points);
 
     bool MassageData(); // return whether anything was changed
 
@@ -18,5 +18,5 @@ public:
 
 private:
     std::vector<SamplePoint> m_points;
-    std::array<bool, ut(SamplePoint::ValueIndex::NUM_VALUES)> m_hasData;
+    std::array<bool, SamplePoint::eNUM_VALUES> m_hasData;
 };

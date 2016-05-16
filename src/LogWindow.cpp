@@ -2,12 +2,19 @@
 
 #include "HypReader.h"
 
-#include <QtWidgets>
+//#pragma warning(disable:4127)
+//#include <QtWidgets>
+//#pragma warning(default:4127)
+#include <QIcon>
+#include <QString>
+#include <QTextCursor>
 
 LogWindow::LogWindow(QWidget* parent)
     : QTextEdit(parent)
 {
     //setAttribute(Qt::WA_DeleteOnClose);
+    setWindowTitle(tr("Log Window"));
+    setWindowIcon(QIcon(":/images/face-smile.png"));
 }
 
 void LogWindow::AddLine(const QString& text)

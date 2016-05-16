@@ -8,14 +8,12 @@ Recording::Recording(std::vector<SamplePoint>&& points)
     : m_points(points)
 {
     m_hasData.fill(false);  
-    m_hasData[ut(SamplePoint::ValueIndex::seconds)] = true; // time is always present
+    m_hasData[SamplePoint::eSeconds] = true; // time is always present
 }
 //------------------------------------------------------------------------------
 // return whether anything was changed
 bool Recording::MassageData()
 {
-    using vi = SamplePoint::ValueIndex;
-
     const size_t N_points = m_points.size();
     if (N_points == 0) {
         return false; // nothing to do
@@ -30,7 +28,7 @@ bool Recording::MassageData()
         size_t same_seconds_inarow = 1;
         double prev_seconds = -1.0; // not set
         for (const SamplePoint& pt : m_points) {
-            const double& seconds = pt[vi::seconds];
+            const double& seconds = pt[SamplePoint::eSeconds];
             if (prev_seconds >= 0.0) {
                 if (prev_seconds == seconds) {
                     ++same_seconds_inarow;
@@ -59,14 +57,14 @@ bool Recording::MassageData()
         size_t prev_sec_idx = 0;
         for (size_t i = 0; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
-            const double& seconds = pt[vi::seconds];
+            const double& seconds = pt[SamplePoint::eSeconds];
             if (prev_seconds >= 0.0) {
                 if (prev_seconds != seconds) { // value just changed
                     if (prev_sec_idx + 1 < i) {
                         changed = true;
                         const double s0 = seconds - (i - prev_sec_idx)*ds;
                         for (size_t j = prev_sec_idx; j < i; ++j) {
-                            m_points[j][vi::seconds] = s0 + ds*(j - prev_sec_idx);
+                            m_points[j][SamplePoint::eSeconds] = s0 + ds*(j - prev_sec_idx);
                         }
                     }
                     prev_seconds = seconds;
@@ -78,30 +76,30 @@ bool Recording::MassageData()
         }
         if (prev_sec_idx + 1 < N_points) {
             changed = true;
-            const double s0 = m_points[prev_sec_idx][vi::seconds];
+            const double s0 = m_points[prev_sec_idx][SamplePoint::eSeconds];
             for (size_t j = prev_sec_idx+1; j < N_points; ++j) {
-                m_points[j][vi::seconds] = s0 + ds*(j - prev_sec_idx);
+                m_points[j][SamplePoint::eSeconds] = s0 + ds*(j - prev_sec_idx);
             }
         }
     }
 
     // Next, record more accurate discharge values
     const SamplePoint& pt0 = m_points.front();
-    double discharged = pt0[vi::mAh_Out];
-    double prev_amps  = pt0[vi::amps];
-    const double dt = (N_points > 1)? m_points[1][vi::seconds] - pt0[vi::seconds]
+    double discharged = pt0[SamplePoint::emAh_Out];
+    double prev_amps  = pt0[SamplePoint::eAmps];
+    const double dt = (N_points > 1)? m_points[1][SamplePoint::eSeconds] - pt0[SamplePoint::eSeconds]
                                     : 0.0;
     for (size_t i = 1; i < N_points; ++i) {
         SamplePoint& pt = m_points[i];
-        const double orig_discharge = pt[vi::mAh_Out];
-        const double& amps = pt[vi::amps];
-        pt[vi::mAh_Out] = discharged += 0.5*(prev_amps + amps)*dt;
-        changed |= (orig_discharge != pt[vi::mAh_Out]);
+        const double orig_discharge = pt[SamplePoint::emAh_Out];
+        const double& amps = pt[SamplePoint::eAmps];
+        pt[SamplePoint::emAh_Out] = discharged += 0.5*(prev_amps + amps)*dt;
+        changed |= (orig_discharge != pt[SamplePoint::emAh_Out]);
         prev_amps = amps;
     }
 
     // Finally, find which series have (non-const) data
-    for (size_t j = 1; j < ut(SamplePoint::ValueIndex::NUM_VALUES); ++j) {
+    for (size_t j = 1; j < SamplePoint::eNUM_VALUES; ++j) {
         m_hasData[j] = false;
         for (size_t i = 1; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
@@ -126,7 +124,7 @@ void Recording::PrintHeader(std::ostream& os, bool skipEmpty) const
     if (skipEmpty) {
         const SamplePoint& pt0 = m_points.front();
         bool first = true;
-        for (size_t i = 1; i < ut(SamplePoint::ValueIndex::NUM_VALUES); ++i) {
+        for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
             if (!m_hasData[i]) {
                 os << ((first)? "Constant values: ":"; ") << SamplePoint::SeriesName(i) << " = " 
                    << std::fixed<<std::setprecision(SamplePoint::sSeriesPrecision[i]) << pt0[i];
@@ -138,7 +136,7 @@ void Recording::PrintHeader(std::ostream& os, bool skipEmpty) const
 
     // Next, columns with varying data
     os << SamplePoint::SeriesName(0); // seconds are always present
-    for (size_t i = 1; i < ut(SamplePoint::ValueIndex::NUM_VALUES); ++i) {
+    for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
         if (!skipEmpty || m_hasData[i]) {
             os << "\t" << SamplePoint::SeriesName(i);
         }
@@ -150,7 +148,7 @@ void Recording::PrintData(std::ostream& os, bool skipEmpty) const
 {
     for (const auto& pt : m_points) {
         os << std::fixed << std::setprecision(SamplePoint::sSeriesPrecision[0]) << pt[0]; // seconds are always present
-        for (size_t i = 1; i < ut(SamplePoint::ValueIndex::NUM_VALUES); ++i) {
+        for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
             if (!skipEmpty || m_hasData[i]) {
                 os << "\t" << std::fixed << std::setprecision(SamplePoint::sSeriesPrecision[i]) << pt[i];
             }

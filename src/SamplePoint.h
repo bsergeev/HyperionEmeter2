@@ -18,27 +18,27 @@ constexpr auto ut(E e) noexcept
 
 class SamplePoint {
 public:
-    SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
+    explicit SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
 
-    enum class ValueIndex : size_t {
-        seconds  = 0,
-        volts    = 1,
-        amps     = 2,
-        mAh_Out  = 3,
-        mAh_In   = 4,
-        RPM      = 5,
-        altitude = 6,
-        temp1    = 7,
-        temp2    = 8,
-        temp3    = 9,
-        throttle = 10,
-        tempAmb  = 11,
-        NUM_VALUES // the last
+    enum ValueIndex {
+        eSeconds  = 0,
+        eVolts    = 1,
+        eAmps     = 2,
+        emAh_Out  = 3,
+        emAh_In   = 4,
+        eRPM      = 5,
+        eAltitude = 6,
+        eTemp1    = 7,
+        eTemp2    = 8,
+        eTemp3    = 9,
+        eThrottle = 10,
+        eTempAmb  = 11,
+        eNUM_VALUES // the last
     };
 
-    inline double& operator [](ValueIndex idx) {
-        if (idx < ValueIndex::NUM_VALUES) {
-            return m_values[ut(idx)];
+    inline double& operator [](size_t idx) {
+        if (idx < eNUM_VALUES) {
+            return m_values[idx];
         } else {
             assert(!"Invalid index");
             static double ERROR = 0.0;
@@ -46,18 +46,8 @@ public:
         }
     }
 
-    inline const double& operator [](ValueIndex idx) const {
-        if (idx < ValueIndex::NUM_VALUES) {
-            return m_values[ut(idx)];
-        } else {
-            assert(!"Invalid index");
-            static const double ERROR = 0.0;
-            return ERROR;
-        }
-    }
-
     inline const double& operator [](size_t idx) const {
-        if (idx < ut(ValueIndex::NUM_VALUES)) {
+        if (idx < eNUM_VALUES) {
             return m_values[idx];
         } else {
             assert(!"Invalid index");
@@ -68,14 +58,14 @@ public:
 
 //static:
     static const char* SeriesName(size_t idx) {
-        if (idx < ut(ValueIndex::NUM_VALUES)) { return sSeriesNames[idx]; } 
-        else                                  { return "ERROR"; }
+        if (idx < eNUM_VALUES) { return sSeriesNames[idx]; } 
+        else                   { return "ERROR"; }
     }
 
-    static const std::array<size_t, ut(ValueIndex::NUM_VALUES)> sSeriesPrecision;
+    static const std::array<size_t, eNUM_VALUES> sSeriesPrecision;
 
 private:
-    std::array<double, ut(ValueIndex::NUM_VALUES)> m_values;
+    std::array<double, eNUM_VALUES> m_values;
 //static
-    static const std::array<const char*, ut(ValueIndex::NUM_VALUES)> sSeriesNames;
+    static const std::array<const char*, eNUM_VALUES> sSeriesNames;
 };
