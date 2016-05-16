@@ -1,14 +1,13 @@
 // On Mac, install FTDI driver from here:
 // http://www.ftdichip.com/Drivers/VCP/MacOSX/FTDIUSBSerialDriver_v2_2_18.dmg
 
-#include <array>
+#include "ComUtils.h"
+
 #include <assert.h>
 #include <iostream>
 #include <iomanip>
 
 #include <gsl_util.h> // finally
-
-#include "ComUtils.h"
 
 #include <QDebug>
 #include <QThread>

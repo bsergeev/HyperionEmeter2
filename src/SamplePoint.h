@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iosfwd>
 #include <stdint.h>
 #include <type_traits>
 

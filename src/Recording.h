@@ -3,7 +3,7 @@
 #include "SamplePoint.h"
 
 #include <array>
-#include <stdint.h>
+#include <iosfwd>
 #include <vector>
 
 class Recording 
