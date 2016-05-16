@@ -11,7 +11,7 @@ bool MainWnd::kAskForConfgirmation = true;
 MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
     , m_reader(std::make_unique<HypReader>([this](const QString& s){ DisplayMessage(s); }, this))
-    , m_mdiArea  (new QMdiArea)
+    , m_mdiArea(new QMdiArea)
 {
     m_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     m_mdiArea->setVerticalScrollBarPolicy  (Qt::ScrollBarAsNeeded);
@@ -103,7 +103,10 @@ void MainWnd::SaveToFile()
     if (!filePath.isEmpty()) // empty name means 'Cancel' was hit
     {
         const bool ok = m_reader->SaveToFile(filePath);
-        if (!ok) {
+        if (ok) {
+            m_logWindow->AddLine(tr("Saved recording(s) to \"%1\"").arg(filePath));
+        } else {
+            m_logWindow->AddLine(tr("Failed to save recording(s) to \"%1\"").arg(filePath));
             QMessageBox::critical(this, "Save Error", "Saving the recording failed!");
         }
     }

@@ -1,23 +1,22 @@
 #pragma once
 
+#include "SamplePoint.h"
+
+#include <array>
 #include <stdint.h>
 #include <vector>
 
-class SamplePoint;
-
 class Recording 
 {
-    friend std::ostream& operator <<(std::ostream& os, const Recording& obj);
 public:
     Recording(std::vector<SamplePoint>&& points);
 
     bool MassageData(); // return whether anything was changed
 
-    static void PrintHeader (std::ostream& os);
-    static void PrintDivider(std::ostream& os);
+    void PrintHeader(std::ostream& os, bool skipEmpty = true) const;
+    void PrintData  (std::ostream& os, bool skipEmpty = true) const;
 
 private:
-    std::vector <SamplePoint> m_points;
+    std::vector<SamplePoint> m_points;
+    std::array<bool, ut(SamplePoint::ValueIndex::NUM_VALUES)> m_hasData;
 };
-
-std::ostream& operator <<(std::ostream& os, const Recording& obj);

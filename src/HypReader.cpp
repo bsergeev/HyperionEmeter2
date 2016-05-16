@@ -32,7 +32,7 @@ void HypReader::FinishDownload(bool success)
     {
         m_recordings.clear();
             
-        Recording::PrintHeader(std::cout);
+        //Recording::PrintHeader(std::cout);
         for (auto& sessionData : m_downloadedRawData)
         {
             const size_t DATA_SIZE = sessionData.size();
@@ -41,7 +41,7 @@ void HypReader::FinishDownload(bool success)
             std::vector<SamplePoint> points;
             points.reserve(DATA_SIZE / Hyperion::RECORD_LENGTH);
 
-            Recording::PrintDivider(std::cout);
+            //Recording::PrintDivider(std::cout);
             for (size_t recordAddr=0; recordAddr+Hyperion::RECORD_LENGTH-1 < DATA_SIZE; recordAddr += Hyperion::RECORD_LENGTH) {
                 points.emplace_back(gsl::span<uint8_t, Hyperion::RECORD_LENGTH>
                                     { &sessionData[recordAddr], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
@@ -115,7 +115,9 @@ bool HypReader::SaveToFile(const QString& filePath)
         std::ofstream file(filePath.toStdString(), std::ios_base::out);
         if ((ok = (file.good() && file.is_open())) == true) {
             for (auto& recording : m_recordings) {
-                file << recording << "\n";
+                recording.PrintHeader(file);
+                recording.PrintData  (file);
+                file << std::endl;
             }
             ok = !file.fail();
         }

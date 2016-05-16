@@ -257,7 +257,7 @@ void DeviceLink::DownloadThreadFn()
                             if (timedOut) {
                                 ok = true;  // timeout is normal at the end of a recording
                                 if (m_seriesEndCbk) { m_seriesEndCbk(); }
-                                SendMessage(tr("Finished downloading session #%1").arg(sessionIdx + 1));
+                                SendMessage(tr("Finished downloading recording #%1\n").arg(sessionIdx + 1));
                             }  // it'll break out of the loop
                         }
                     }

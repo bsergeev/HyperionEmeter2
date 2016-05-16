@@ -6,7 +6,7 @@
 #include <span.h>        // gsl::span
 #include "HypCommands.h" // RECORD_LENGTH
 
-// Utility constexpr function coverting a enum class to its underlying type
+// Utility constexpr function converting a enum class to its underlying type
 template <typename E,
           typename = std::enable_if_t<std::is_enum<E>::value>>
 constexpr auto ut(E e) noexcept
@@ -16,7 +16,6 @@ constexpr auto ut(E e) noexcept
 
 
 class SamplePoint {
-    friend std::ostream& operator <<(std::ostream& os, const SamplePoint& obj);
 public:
     SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
 
@@ -56,8 +55,26 @@ public:
         }
     }
 
+    inline const double& operator [](size_t idx) const {
+        if (idx < ut(ValueIndex::NUM_VALUES)) {
+            return m_values[idx];
+        } else {
+            assert(!"Invalid index");
+            static const double ERROR = 0.0;
+            return ERROR;
+        }
+    }
+
+//static:
+    static const char* SeriesName(size_t idx) {
+        if (idx < ut(ValueIndex::NUM_VALUES)) { return sSeriesNames[idx]; } 
+        else                                  { return "ERROR"; }
+    }
+
+    static const std::array<size_t, ut(ValueIndex::NUM_VALUES)> sSeriesPrecision;
+
 private:
     std::array<double, ut(ValueIndex::NUM_VALUES)> m_values;
+//static
+    static const std::array<const char*, ut(ValueIndex::NUM_VALUES)> sSeriesNames;
 };
-
-std::ostream& operator <<(std::ostream& os, const SamplePoint& obj);
