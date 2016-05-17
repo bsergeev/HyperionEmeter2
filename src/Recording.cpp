@@ -9,6 +9,12 @@ Recording::Recording(std::vector<SamplePoint>&& points)
 {
     m_hasData.fill(false);  
     m_hasData[SamplePoint::eSeconds] = true; // time is always present
+    
+    // Set default column to SamplePoint index mapping
+    for (size_t i = 0; i < SamplePoint::eNUM_VALUES; ++i) {
+        m_column2ptIdx[i] = i;
+    }
+
 }
 //------------------------------------------------------------------------------
 // return whether anything was changed
@@ -99,12 +105,14 @@ bool Recording::MassageData()
     }
 
     // Finally, find which series have (non-const) data
+    m_numHasData = 1;
     for (size_t j = 1; j < SamplePoint::eNUM_VALUES; ++j) {
         m_hasData[j] = false;
         for (size_t i = 1; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
             if (fabs(pt[j] - pt0[j]) > 0.001) {
                 m_hasData[j] = true;
+                m_column2ptIdx[m_numHasData++] = j;
                 break;
             }
         }
@@ -155,5 +163,25 @@ void Recording::PrintData(std::ostream& os, bool skipEmpty) const
         }
         os << std::endl;
     }
+}
+//------------------------------------------------------------------------------
+const char* Recording::SeriesName(size_t col) const
+{
+    const char* name = nullptr;
+    if (0 <= col && col < numColums()) { 
+        name = SamplePoint::SeriesName(m_column2ptIdx[col]);
+    }
+    return name;
+}
+//------------------------------------------------------------------------------
+double Recording::GetValue(size_t row, size_t col) const
+{
+    double v = 0.0;
+    if (0 <= row && row < m_points.size()
+     && 0 <= col && col < numColums()) {
+        const SamplePoint& pt = m_points.at(row);
+        return pt[m_column2ptIdx[col]];
+    }
+    return v;
 }
 //------------------------------------------------------------------------------

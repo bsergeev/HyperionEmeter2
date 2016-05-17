@@ -1,13 +1,12 @@
 #pragma once
 
-#include <iosfwd>
 #include <stdint.h>
-#include <type_traits>
 
 #include <span.h>        // gsl::span
 #include "HypCommands.h" // RECORD_LENGTH
 
-// Utility constexpr function converting a enum class to its underlying type
+// Utility constexpr function converting a enum class to its underlying type N/U
+#include <type_traits>
 template <typename E,
           typename = std::enable_if_t<std::is_enum<E>::value>>
 constexpr auto ut(E e) noexcept
@@ -21,18 +20,18 @@ public:
     explicit SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
 
     enum ValueIndex {
-        eSeconds  = 0,
-        eVolts    = 1,
-        eAmps     = 2,
-        emAh_Out  = 3,
-        emAh_In   = 4,
-        eRPM      = 5,
-        eAltitude = 6,
-        eTemp1    = 7,
-        eTemp2    = 8,
-        eTemp3    = 9,
-        eThrottle = 10,
-        eTempAmb  = 11,
+        eSeconds = 0,
+        eVolts   ,
+        eAmps    ,
+        emAh_Out ,
+        emAh_In  ,
+        eRPM     ,
+        eAltitude,
+        eTemp1   ,
+        eTemp2   ,
+        eTemp3   ,
+        eThrottle,
+        eTempAmb ,
         eNUM_VALUES // the last
     };
 

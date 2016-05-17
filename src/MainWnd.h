@@ -25,6 +25,7 @@ public:
 
 signals:
     void MessageToDisplay(const QString& msg);
+    void SignalDLFinished(size_t numRecsDownloaded);
 
 private:
     void DownloadFromDevice();
@@ -35,10 +36,12 @@ private:
     void updateMenus();
 
     void DisplayMessageFromReader(const QString& msg);
+    void FinishDownload(size_t numRecsDownloaded);
 
     // These get called from DeviceLink worker thread.
     // They emit the data to be processed on UI thread.
     void DisplayMessage(const QString& msg);
+    void DownloadFinished(size_t numRecsDownloaded);
 
     void ReadSettings();
     void WriteSettings();

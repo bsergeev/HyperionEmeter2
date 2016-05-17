@@ -1,6 +1,9 @@
 #include "MainWnd.h"
 
 #include "LogWindow.h"
+#include "Recording.h"
+#include "RecordingDataModel.h"
+#include "RecordingTableView.h"
 #include "CustomWidgets/YesNoDlg.h"
 
 #include <QtWidgets>
@@ -10,7 +13,9 @@ bool MainWnd::kAskForConfgirmation = true;
 
 MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
-    , m_reader(std::make_unique<HypReader>([this](const QString& s){ DisplayMessage(s); }, this))
+    , m_reader(std::make_unique<HypReader>([this](const QString& s){ DisplayMessage(s); },
+                                           [this](size_t numRsDled){ DownloadFinished(numRsDled); },
+                                           this))
     , m_mdiArea(new QMdiArea)
 {
     m_mdiArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
@@ -60,6 +65,7 @@ MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     updateMenus();
 
     connect(this, &MainWnd::MessageToDisplay, this, &MainWnd::DisplayMessageFromReader);
+    connect(this, &MainWnd::SignalDLFinished, this, &MainWnd::FinishDownload);
 }
 MainWnd::~MainWnd() {
     WriteSettings();
@@ -100,7 +106,7 @@ void MainWnd::SaveToFile()
     QString filter = tr("Tab Separated Values (*.tsv)");
     QString title = tr("Save recordings to a file");
     QString filePath = QFileDialog::getSaveFileName(this, title, ".", filter);
-    if (!filePath.isEmpty()) // empty name means 'Cancel' was hit
+    if (!filePath.isEmpty()) // empty means 'Cancel' was hit
     {
         const bool ok = m_reader->SaveToFile(filePath);
         if (ok) {
@@ -114,12 +120,32 @@ void MainWnd::SaveToFile()
 //------------------------------------------------------------------------------
 // Called from a worker thread
 void MainWnd::DisplayMessage(const QString& m) { emit MessageToDisplay(m); }
+void MainWnd::DownloadFinished(size_t numRecsDownloaded) { emit SignalDLFinished(numRecsDownloaded); }
 
 // Receives the message on the UI thread
 void MainWnd::DisplayMessageFromReader(const QString& msg)
 {
     if (!msg.isEmpty()) {
         m_logWindow->AddLine(msg);
+    }
+}
+
+void MainWnd::FinishDownload(size_t numRecsDownloaded)
+{
+    if (numRecsDownloaded == 0) {
+        m_logWindow->AddLine(tr("Failed to download any recordings"));
+    } else {
+        m_logWindow->AddLine(tr("Downloaded %1 recording%2").arg(numRecsDownloaded)
+                                                            .arg((numRecsDownloaded > 1)? "s":""));
+        for (size_t i = 0; i < numRecsDownloaded; ++i) {
+            if (m_reader->GetRecording(i).size() > 0) {
+                if (RecordingTableView* tableView = new (std::nothrow) RecordingTableView(new RecordingDataModel(m_reader.get(), i))) {
+                    tableView->setWindowTitle(QObject::tr("Recording %1").arg(i + 1));
+                    m_mdiArea->addSubWindow(tableView);
+                    tableView->show();
+                }
+            }
+        }
     }
 }
 //------------------------------------------------------------------------------

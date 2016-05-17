@@ -13,9 +13,12 @@
 const QString HypReader::BS = QChar(0x10);
 
 //------------------------------------------------------------------------------
-HypReader::HypReader(std::function<void(const QString&)> msgCBk, QObject* parent)
+HypReader::HypReader(std::function<void(const QString&)> msgCBk, 
+                     std::function<void(size_t)> finishedCBck,
+                     QObject* parent)
     : QObject(parent)
     , m_msgCBck(msgCBk)
+    , m_finishedCBck(finishedCBck)
 {
     connect(this, &HypReader::SeriesEnded,    this, &HypReader::EndSeries);
     connect(this, &HypReader::DownloadFinish, this, &HypReader::FinishDownload);
@@ -32,7 +35,6 @@ void HypReader::FinishDownload(bool success)
     {
         m_recordings.clear();
             
-        //Recording::PrintHeader(std::cout);
         for (auto& sessionData : m_downloadedRawData)
         {
             const size_t DATA_SIZE = sessionData.size();
@@ -49,15 +51,16 @@ void HypReader::FinishDownload(bool success)
 
             m_recordings.emplace_back(Recording{ std::move(points) });
             m_recordings.back().MassageData();
-
-            //std::cout << m_recordings.back();
         }
-    } else { // failure
+
+        // Notify the caller that m_recordings.size() recordings have been downloaded
+        m_finishedCBck(m_recordings.size());
+    } 
+    else { // failure
         if (m_msgCBck) {
             m_msgCBck(tr("Download failed!"));
         }
     }
-//    m_DownloadBtn->setEnabled(true);
 }
 //------------------------------------------------------------------------------
 // These gets called from DeviceLink worker thread:
@@ -124,4 +127,21 @@ bool HypReader::SaveToFile(const QString& filePath)
     }
     return ok;
 }
+//------------------------------------------------------------------------------
+size_t HypReader::GetNumRecordings() const 
+{ 
+    return m_recordings.size(); 
+}
+
+const Recording& HypReader::GetRecording(size_t idx) const
+{
+    if (idx < m_recordings.size()) {
+        return m_recordings.at(idx);
+    } else {
+        assert(!"Invalid recording index");
+        static const Recording error{ std::vector<SamplePoint>() };
+        return error;
+    }
+}
+
 //------------------------------------------------------------------------------

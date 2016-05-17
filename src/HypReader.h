@@ -18,6 +18,7 @@ class HypReader : public QObject
     Q_OBJECT
 public:
     explicit HypReader(std::function<void(const QString&)> msgCBck,
+                       std::function<void(size_t)> finishedCBck, 
                        QObject* parent = nullptr);
 
     void DownloadFromDevice();
@@ -25,6 +26,9 @@ public:
 
     bool LoadFromFile(const QString& filePath);
     bool SaveToFile  (const QString& filePath);
+
+    size_t GetNumRecordings() const; // { return m_recordings.size(); }
+    const Recording& GetRecording(size_t idx) const;
 
 signals:
     void SeriesEnded();
@@ -42,6 +46,7 @@ private:
 
 //data:
     std::function<void(const QString&)> m_msgCBck;
+    std::function<void(size_t)>         m_finishedCBck;
     std::unique_ptr<DeviceLink>         m_deviceReader;
 
     std::vector<std::vector<uint8_t>> m_downloadedRawData;
