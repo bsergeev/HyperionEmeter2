@@ -165,15 +165,6 @@ void Recording::PrintData(std::ostream& os, bool skipEmpty) const
     }
 }
 //------------------------------------------------------------------------------
-const char* Recording::SeriesName(size_t col) const
-{
-    const char* name = nullptr;
-    if (0 <= col && col < numColums()) { 
-        name = SamplePoint::SeriesName(m_column2ptIdx[col]);
-    }
-    return name;
-}
-//------------------------------------------------------------------------------
 double Recording::GetValue(size_t row, size_t col) const
 {
     double v = 0.0;
@@ -183,5 +174,23 @@ double Recording::GetValue(size_t row, size_t col) const
         return pt[m_column2ptIdx[col]];
     }
     return v;
+}
+//------------------------------------------------------------------------------
+const char* Recording::SeriesName(size_t col) const
+{
+    const char* name = nullptr;
+    if (0 <= col && col < numColums()) { 
+        name = SamplePoint::SeriesName(m_column2ptIdx[col]);
+    }
+    return name;
+}
+//------------------------------------------------------------------------------
+size_t Recording::SeriesPrecision(size_t col) const
+{
+    size_t precision = 0;
+    if (0 <= col && col < numColums()) { 
+        precision = SamplePoint::sSeriesPrecision[m_column2ptIdx[col]];
+    }
+    return precision;
 }
 //------------------------------------------------------------------------------

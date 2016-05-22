@@ -39,7 +39,8 @@ QVariant RecordingDataModel::data(const QModelIndex& index, int role) const
 #if 1                                         
         const size_t row = static_cast<size_t>(index.row());
         const size_t col = static_cast<size_t>(index.column());
-        return QVariant(m_recording.GetValue(row, col));
+        return QVariant(QString::number(m_recording.GetValue(row, col), 'f', 
+                                        m_recording.SeriesPrecision(col)));
 #else
         Measurement const& m = thisFlight[index.row()];
         double t = m[kIdxTime];
@@ -82,7 +83,9 @@ QVariant RecordingDataModel::headerData(int col, Qt::Orientation orientation, in
         if (orientation == Qt::Horizontal
          && 0 <= col && col < m_recording.numColums())
         {
-            return QString(m_recording.SeriesName(col));
+            QString title(m_recording.SeriesName(col));
+            title.replace(", ", "\n");
+            return title;
         }
     }
     return QVariant::Invalid;

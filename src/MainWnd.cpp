@@ -3,6 +3,8 @@
 #include "LogWindow.h"
 #include "Recording.h"
 #include "RecordingDataModel.h"
+#include "RecordingDisplayWnd.h"
+#include "RecordingPlotter.h"
 #include "RecordingTableView.h"
 #include "CustomWidgets/YesNoDlg.h"
 
@@ -119,8 +121,8 @@ void MainWnd::SaveToFile()
 }
 //------------------------------------------------------------------------------
 // Called from a worker thread
-void MainWnd::DisplayMessage(const QString& m) { emit MessageToDisplay(m); }
-void MainWnd::DownloadFinished(size_t numRecsDownloaded) { emit SignalDLFinished(numRecsDownloaded); }
+void MainWnd::DisplayMessage  (const QString& msg)  { emit MessageToDisplay(msg); }
+void MainWnd::DownloadFinished(size_t NRecsDwnlded) { emit SignalDLFinished(NRecsDwnlded); }
 
 // Receives the message on the UI thread
 void MainWnd::DisplayMessageFromReader(const QString& msg)
@@ -130,19 +132,28 @@ void MainWnd::DisplayMessageFromReader(const QString& msg)
     }
 }
 
-void MainWnd::FinishDownload(size_t numRecsDownloaded)
+// Instantiate result windows on the UI thread
+void MainWnd::FinishDownload(size_t N_recsDLed)
 {
-    if (numRecsDownloaded == 0) {
+    if (N_recsDLed == 0) {
         m_logWindow->AddLine(tr("Failed to download any recordings"));
     } else {
-        m_logWindow->AddLine(tr("Downloaded %1 recording%2").arg(numRecsDownloaded)
-                                                            .arg((numRecsDownloaded > 1)? "s":""));
-        for (size_t i = 0; i < numRecsDownloaded; ++i) {
-            if (m_reader->GetRecording(i).size() > 0) {
-                if (RecordingTableView* tableView = new (std::nothrow) RecordingTableView(new RecordingDataModel(m_reader.get(), i))) {
-                    tableView->setWindowTitle(QObject::tr("Recording %1").arg(i + 1));
-                    m_mdiArea->addSubWindow(tableView);
-                    tableView->show();
+        m_logWindow->AddLine(tr("Downloaded %1 recording%2").arg(N_recsDLed)
+                                                            .arg((N_recsDLed > 1)? "s":""));
+        for (size_t i = 0; i < N_recsDLed; ++i) {
+            if (m_reader->GetRecording(i).size() > 0) 
+            {
+                auto dataModel = std::make_shared<RecordingDataModel>(m_reader.get(), i);
+                auto tableView = std::make_unique<RecordingTableView>(dataModel);
+                auto plotter   = std::make_unique<RecordingPlotter>  (dataModel);
+                if (tableView.get() != nullptr && plotter.get() != nullptr) {
+                    if (auto w = new RecordingDisplayWnd(std::move(tableView), std::move(plotter), this)) {
+                        w->setWindowTitle(QObject::tr("Recording %1").arg(i + 1));
+                        w->setWindowIcon(QIcon(":/images/face-smile.png"));
+
+                        m_mdiArea->addSubWindow(w);
+                        w->show();
+                    }
                 }
             }
         }

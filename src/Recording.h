@@ -16,15 +16,17 @@ public:
     void PrintHeader(std::ostream& os, bool skipEmpty = true) const;
     void PrintData  (std::ostream& os, bool skipEmpty = true) const;
 
-    size_t size()      const { return m_points.size();  }
+    size_t size()      const { return m_points.size(); }
     size_t numColums() const { return m_numHasData;  }
-    const char* SeriesName     (size_t col) const;
     double GetValue(size_t row, size_t col) const;
+
+    const char* SeriesName(size_t col) const;
+    size_t SeriesPrecision(size_t col) const;
 
 private:
     std::vector<SamplePoint> m_points;
 
     std::array        <bool,   SamplePoint::eNUM_VALUES> m_hasData;
     mutable std::array<size_t, SamplePoint::eNUM_VALUES> m_column2ptIdx;
-    mutable size_t  m_numHasData = 1;
+    mutable size_t  m_numHasData = 1; // time is always there
 };

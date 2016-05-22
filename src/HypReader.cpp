@@ -52,7 +52,9 @@ void HypReader::FinishDownload(bool success)
             m_recordings.emplace_back(Recording{ std::move(points) });
             m_recordings.back().MassageData();
         }
-
+        if (!m_recordings.empty() && m_recordings.back().size() == 0) {
+            m_recordings.pop_back();
+        }
         // Notify the caller that m_recordings.size() recordings have been downloaded
         m_finishedCBck(m_recordings.size());
     } 

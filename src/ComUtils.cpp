@@ -190,11 +190,11 @@ void DeviceLink::DownloadThreadFn()
             dataVec_t reply(1, 0);
             if (com->read(&reply[0], 1)) {
                 m_firmwareVersionX100 = reply[0];
-                SendMessage(tr("Detected %1%2 firmware v%3.%4 on %5\n")
+                SendMessage(tr("Detected %1 v%2.%3%4 on %5\n")
                             .arg(DEVICE_NAME[static_cast<size_t>(m_deviceType)])
-                            .arg((hasData) ? " with data" : "")
                             .arg(m_firmwareVersionX100 / 100)
                             .arg(m_firmwareVersionX100 % 100, 2, 10, QChar('0'))
+                            .arg((hasData) ? " with data" : "")
                             .arg(portName));
             }
         }
@@ -312,10 +312,11 @@ void DeviceLink::ClearThreadFn()
             dataVec_t reply(1, 0);
             if (com->read(&reply[0], 1)) {
                 m_firmwareVersionX100 = reply[0];
-                SendMessage(tr("Detected %1%2 firmware v%3 on %4\n")
-                            .arg(DEVICE_NAME[(size_t)m_deviceType])
+                SendMessage(tr("Detected %1 v%2.%3%4 on %5\n")
+                            .arg(DEVICE_NAME[static_cast<size_t>(m_deviceType)])
+                            .arg(m_firmwareVersionX100 / 100)
+                            .arg(m_firmwareVersionX100 % 100, 2, 10, QChar('0'))
                             .arg((hasData) ? " with data" : "")
-                            .arg(m_firmwareVersionX100/100.0, 4, 'g', 4)
                             .arg(portName));
             }
         }
