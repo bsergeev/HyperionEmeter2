@@ -143,7 +143,7 @@ void MainWnd::FinishDownload(size_t N_recsDLed)
         for (size_t i = 0; i < N_recsDLed; ++i) {
             if (m_reader->GetRecording(i).size() > 0) 
             {
-                auto dataModel = std::make_shared<RecordingDataModel>(m_reader.get(), i);
+                auto dataModel = std::make_shared<RecordingDataModel>(m_reader->GetRecording(i));
                 auto tableView = std::make_unique<RecordingTableView>(dataModel);
                 auto plotter   = std::make_unique<RecordingPlotter>  (dataModel);
                 if (tableView.get() != nullptr && plotter.get() != nullptr) {

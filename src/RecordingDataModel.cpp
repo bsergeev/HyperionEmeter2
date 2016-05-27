@@ -3,8 +3,8 @@
 #include "HypReader.h"
 #include "Recording.h"
 
-RecordingDataModel::RecordingDataModel(HypReader* reader, size_t recIdx)
-    : m_recording(reader->GetRecording(recIdx))
+RecordingDataModel::RecordingDataModel(const Recording& rec)
+    : m_recording(rec)
 {
 }
 //------------------------------------------------------------------------------
@@ -39,8 +39,8 @@ QVariant RecordingDataModel::data(const QModelIndex& index, int role) const
 #if 1                                         
         const size_t row = static_cast<size_t>(index.row());
         const size_t col = static_cast<size_t>(index.column());
-        return QVariant(QString::number(m_recording.GetValue(row, col), 'f', 
-                                        m_recording.SeriesPrecision(col)));
+        return QVariant(QString::number(m_recording.GetValue(row, ColumnIdx(col)), 'f', 
+                                        m_recording.SeriesPrecision(ColumnIdx(col))));
 #else
         Measurement const& m = thisFlight[index.row()];
         double t = m[kIdxTime];
@@ -81,9 +81,9 @@ QVariant RecordingDataModel::headerData(int col, Qt::Orientation orientation, in
     if (role == Qt::DisplayRole)
     {
         if (orientation == Qt::Horizontal
-         && 0 <= col && col < m_recording.numColums())
+         && 0 <= col && col < static_cast<int>(m_recording.numColums()))
         {
-            QString title(m_recording.SeriesName(col));
+            QString title(m_recording.SeriesName(ColumnIdx(col)));
             title.replace(", ", "\n");
             return title;
         }

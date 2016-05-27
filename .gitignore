@@ -4,6 +4,7 @@ GeneratedFiles/*
 Debug/*
 Release/*
 x64/*
+*.ilk
 *.opensdf
 *.opendb
 *.sdf

@@ -104,19 +104,35 @@ bool Recording::MassageData()
         prev_amps = amps;
     }
 
-    // Finally, find which series have (non-const) data
+    // Find which series have (non-const) data
     m_numHasData = 1;
     for (size_t j = 1; j < SamplePoint::eNUM_VALUES; ++j) {
         m_hasData[j] = false;
         for (size_t i = 1; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
-            if (fabs(pt[j] - pt0[j]) > 0.001) {
-                m_hasData[j] = true;
+            if (fabs(pt[j] - pt0[j]) > 0.001) { // as the max accuracy is 0.01
+				m_hasData[j] = true;
                 m_column2ptIdx[m_numHasData++] = j;
                 break;
             }
         }
     }
+
+	// Record min/max values for all curves
+    for (size_t j = 0; j < SamplePoint::eNUM_VALUES; ++j) {
+		double minV =  std::numeric_limits<double>::max();
+		double maxV = -std::numeric_limits<double>::max();
+		for (size_t i = 0; i < N_points; ++i) {
+            const double v = m_points[i][j];
+			if (minV > v) {	minV = v; }
+			if (maxV < v) { maxV = v; }
+		}
+		assert(minV <= maxV);
+		CurveInfo& ci = m_curveInfo[j];
+		ci.minV = minV;
+		ci.maxV = maxV;
+	}
+
 
     return changed;
 }
@@ -165,7 +181,7 @@ void Recording::PrintData(std::ostream& os, bool skipEmpty) const
     }
 }
 //------------------------------------------------------------------------------
-double Recording::GetValue(size_t row, size_t col) const
+double Recording::GetValue(size_t row, ColumnIdx col) const
 {
     double v = 0.0;
     if (0 <= row && row < m_points.size()
@@ -176,7 +192,18 @@ double Recording::GetValue(size_t row, size_t col) const
     return v;
 }
 //------------------------------------------------------------------------------
-const char* Recording::SeriesName(size_t col) const
+const CurveInfo& Recording::GetCurveInfo(ColumnIdx col) const
+{
+	if (0 <= col && col < numColums()) {
+		return m_curveInfo[m_column2ptIdx[col]];
+	} else {
+		assert(!"Invalid column index");
+		const static CurveInfo error;
+		return error;
+	}
+}
+//------------------------------------------------------------------------------
+const char* Recording::SeriesName(ColumnIdx col) const
 {
     const char* name = nullptr;
     if (0 <= col && col < numColums()) { 
@@ -185,7 +212,7 @@ const char* Recording::SeriesName(size_t col) const
     return name;
 }
 //------------------------------------------------------------------------------
-size_t Recording::SeriesPrecision(size_t col) const
+size_t Recording::SeriesPrecision(ColumnIdx col) const
 {
     size_t precision = 0;
     if (0 <= col && col < numColums()) { 
