@@ -10,25 +10,21 @@
 #include <QAction>
 #include <QToolTip>
 
-//------------------------------------------------------------------------------
-
-const short RecordingPlotter::GAP_X = 4;
-const int   RecordingPlotter::NO_STEPS_PROCESSED = -1;
-//bool      RecordingPlotter::kShowTooltip  = true;
-//bool      RecordingPlotter::kShowTitle    = true;
-//bool      RecordingPlotter::kShowSubTitle = true;
-
+#include <sstream>
 //------------------------------------------------------------------------------
 
 RecordingPlotter::RecordingPlotter(const std::shared_ptr<RecordingDataModel>& model,
-    QWidget* parent)
+                                   QWidget* parent)
     : QAbstractItemView(parent)
     , m_model(model)
-    , m_ParentWnd(parent)
 	, m_Font(QFont("Arial", 12))
 {
 	ComputeTicks();
 	m_margin[eLEFT] = m_margin[eRIGHT] = m_margin[eUP] = m_margin[eDOWN] = 5; // it'll be set in UpdateScrMargins
+
+	const Recording& recording = model->GetRecording();
+	const size_t N = recording.numColums();
+	m_curveVisible = std::vector<bool>(N, true);
 }
 //------------------------------------------------------------------------------
 RecordingPlotter::~RecordingPlotter()
@@ -53,14 +49,13 @@ void RecordingPlotter::AdjustScrMargins()
 		+ ((m_showTitle    && !title.   isEmpty())? 1 : 0)
 		+ ((m_showSubTitle && !subTitle.isEmpty())? 1 : 0));
 
-	m_margin[eDOWN] = (short)floor(2.5*h);
+	m_margin[eDOWN] = static_cast<int>(floor(2.5*h));
 
 	m_margin[eLEFT] = w + h + 2 * gapX;
 
-
 	// Depending on the current curve visibility (and active sensors)
 	// there may be up to two extra Y-axes to the right
-	m_margin[eRIGHT] = /* GetNRightAxes()* */(w + h + 2 * gapX);
+	m_margin[eRIGHT] = GetNRightAxes()*(w + h + 2*gapX);
 }
 //------------------------------------------------------------------------------
 QModelIndex RecordingPlotter::indexAt(const QPoint&) const
@@ -92,9 +87,8 @@ void RecordingPlotter::ComputeTicks(int minTickNumber)
 			if (col == 0  &&  maxV >= 60.0) // below 60 seconds it doesn't matter
 			{
 				// Values are seconds.
-				// If time is more than 60sec (which we've just checked),
-				// values are displayed as M:SS. For times to look pretty,
-				// we'd like to have 5, 10, 15, 20, 30, 60sec steps.
+				// Since time is more than 60sec, values are displayed as M:SS. 
+				// For times to look pretty, we'd like to have 5, 10, 15, 20, 30, 60sec steps.
 				int Nmin = 8;
 				double grossStep = r / Nmin;
 
@@ -213,51 +207,275 @@ QString RecordingPlotter::SecondsTxt(double sec)
 	return txt;
 }
 //------------------------------------------------------------------------------
+size_t RecordingPlotter::GetNRightAxes() const
+{
+	const Recording& rec = m_model->GetRecording();
+	const size_t nAxes = 1 + (rec.numColums() > 3)? rec.numColums()-3 : 0;
+	return nAxes;
+}
+//------------------------------------------------------------------------------
 void RecordingPlotter::paintEvent(QPaintEvent*)
 {
+	// <<< DEBUG TMP here
+	const size_t N_COLORS = 13;
+	static const std::array<Qt::GlobalColor, N_COLORS> curveColor = {
+		Qt::black,
+		Qt::blue,
+		Qt::red,
+		Qt::darkRed,
+		Qt::darkCyan,
+		Qt::magenta,
+		Qt::darkYellow,
+		Qt::darkGreen,
+		Qt::green,
+		Qt::darkBlue,
+		Qt::cyan,
+		Qt::darkMagenta,
+		Qt::yellow
+	};
+	const QColor kGraphBkgrColor("#F4F4FF");
+
 	AdjustScrMargins();
 
 	QPainter painter(viewport());
+	painter.setFont(m_Font);
 
 	// Draw chart area
 	const QRect scrRect{ 0, 0, width(), height() };
 	painter.fillRect(scrRect, Qt::white);
 
 	QRect chartRect = scrRect.adjusted(m_margin[eLEFT], m_margin[eUP], -m_margin[eRIGHT], -m_margin[eDOWN]);
-	painter.fillRect(chartRect, QColor("#F4F4FF")); //  MainWnd::kGraphBkgrColor
+	painter.fillRect(chartRect, kGraphBkgrColor);
 
 	painter.setPen(Qt::black);
 	painter.drawRect(chartRect);
 
-	// Tick values and names . . . . . . . . . . . . . . . . . . . . . . . . . .
 	QFontMetrics metrics = painter.fontMetrics();
 
 	if (RecordingDataModel* const model = m_model.get())
 	{
 		const Recording& recording = model->GetRecording();
+
+		// Title [& sub-title] . . . . . . . . . . . . . . . . . . . . . . . . . . . 
+		const QString plotDescription = "Downloaded from RDU/MDU";
+		std::stringstream ss;
+		recording.PrintHeader(ss);
+		const QString plotStats = QString::fromStdString(ss.str());
+		bool title_shown = false;
+		if ((title_shown = (m_showTitle && !plotDescription.isEmpty())) == true)
+		{
+			QRect topRect(0, 0, width(), metrics.height());
+			painter.fillRect(topRect, Qt::white);
+			painter.drawText(topRect, Qt::AlignHCenter | Qt::AlignVCenter, plotDescription);
+		}
+		if (m_showSubTitle && !plotStats.isEmpty())
+		{
+			QRect topRect(0, (title_shown) ? 1.5*metrics.height() : 0, width(), metrics.height());
+			painter.fillRect(topRect, Qt::white);
+			painter.drawText(topRect, Qt::AlignHCenter | Qt::AlignVCenter, plotStats);
+		}
+
+
+		// Tick values and names . . . . . . . . . . . . . . . . . . . . . . . . . .
 		const size_t N_points = recording.size();
 		const size_t N_curves = recording.numColums();
 		const ColumnIdx ci0 = ColumnIdx{ 0 };
 
-		// Tick values along X-axis
+		// Tick values along X-axis . . . . . . . . . . . . . . . . . . . . . . .
 		painter.setPen(Qt::black);
 		const auto& ticsX = m_tickV.at(0);
 		const double minX = ticsX.front();
 		const double maxX = ticsX.back();
-		for (auto t : ticsX)
-		{
+		for (auto t : ticsX) {
 			const int x = ComputeScrCoord(t, minX, maxX, true); // horizontal
 			QString txt = SecondsTxt(t);
 			painter.drawText(x-50, chartRect.bottom()+5, 100, metrics.height(), Qt::AlignHCenter|Qt::AlignTop, txt);
 		}
 		// Draw horizontal axis title
-		QRect bottomRect(0, height() - metrics.height() - 1, width(), metrics.height());
-		painter.drawText(bottomRect, Qt::AlignHCenter|Qt::AlignVCenter, recording.SeriesName(ci0));
+		QRect bottomRect(m_margin[eLEFT], height() - metrics.height() - 1, 
+			             width()-(m_margin[eLEFT]+m_margin[eRIGHT]), metrics.height());
+		const QString xAxisTitle = (maxX > 60)? tr("Time") : tr("Seconds");
+		painter.drawText(bottomRect, Qt::AlignHCenter | Qt::AlignVCenter, xAxisTitle);
 
 
+		// Draw vertical axes/values/titles . . . . . . . . . . . . . . . . . . .
+		const int strPixelHeight = metrics.height();
+		const int tickValueWidth = metrics.width("0.0000");
+		const size_t gapX = 4;
+		const size_t ticW = 4;
+		const size_t N_rAxes = GetNRightAxes();
+		const size_t dX_per_RAxis = static_cast<size_t>(floor(m_margin[eRIGHT] / static_cast<double>(N_rAxes)));
+
+		unsigned short RAxis_processed = 0;
+		short Xtitle_Voltage = -1;
+		short Xtitle_Current = -1;
+
+		QPen bgPen(QBrush(Qt::white, Qt::SolidPattern), 0, Qt::SolidLine);
+		for (size_t crvIdx = 1; crvIdx < N_curves; ++crvIdx)
+		{
+			if (!m_curveVisible[crvIdx])
+				continue;
+
+			const ColumnIdx colIdx = ColumnIdx{ crvIdx };
+			const SamplePoint::ValueIndex curveType = recording.GetColumnType(colIdx);
+
+			// These will be set depending on which Y-axis we are drawing
+			Qt::AlignmentFlag alignH = Qt::AlignRight;
+			float shiftAxisTitle = 0.0;
+			short scrX = 0;
+			short Xtitle = 0;
+
+			switch (curveType)
+			{
+			case SamplePoint::eVolts:
+				alignH = Qt::AlignRight;
+				scrX = chartRect.left();
+				Xtitle = Xtitle_Voltage = gapX;
+				//shiftAxisTitle = ((m_curveVisible[recording.GetColumnOfType(SamplePoint::ePowerIn )])? -0.5 : 0) + 
+				//	             ((m_curveVisible[recording.GetColumnOfType(SamplePoint::ePowerOut)])? -0.5 : 0);
+				break;
+			case SamplePoint::eAmps:
+				alignH = Qt::AlignLeft;
+				scrX = chartRect.right();
+				Xtitle = Xtitle_Current = scrX + gapX + tickValueWidth;
+				shiftAxisTitle = (m_curveVisible[recording.GetColumnOfType(SamplePoint::emAh_Out)])? -0.5 : 0;
+				break;
+			//case kIdxPower:
+			//	if (m_PlotSettingsMgr.IsCurveVisible(kIdxVoltage)) {
+			//		alignH = Qt::AlignLeft;
+			//		scrX = chartRect.left();
+			//		Xtitle = gapX;
+			//		shiftAxisTitle = 0.5;
+			//	}
+			//	else { // Voltage not visible
+			//		alignH = Qt::AlignRight;
+			//		scrX = chartRect.left();
+			//		Xtitle = Xtitle_Voltage = gapX;
+			//		shiftAxisTitle = (m_PlotSettingsMgr.IsCurveVisible(kIdxPOut)) ? -0.5 : 0;
+			//	}
+			//	break;
+			case SamplePoint::emAh_Out:
+				alignH = Qt::AlignRight;
+				scrX = chartRect.right();
+				Xtitle = scrX + gapX + tickValueWidth;
+				shiftAxisTitle = (m_curveVisible[recording.GetColumnOfType(SamplePoint::eAmps)])? 0.5 : 0;
+				break;
+			case SamplePoint::eRPM:
+				alignH = Qt::AlignLeft;
+				scrX = chartRect.right() + (++RAxis_processed)*dX_per_RAxis;
+				break;
+			//case kIdxPOut:
+			//	if (m_PlotSettingsMgr.IsCurveVisible(kIdxVoltage)) {
+			//		alignH = Qt::AlignLeft;
+			//		scrX = chartRect.left();
+			//		Xtitle = gapX;
+			//		shiftAxisTitle = (m_PlotSettingsMgr.IsCurveVisible(kIdxPower)) ? 1.5 : 0.5;
+			//	}
+			//	else { // Voltage not visible
+			//		alignH = Qt::AlignRight;
+			//		scrX = chartRect.left();
+			//		Xtitle = Xtitle_Voltage = gapX;
+			//		shiftAxisTitle = (m_PlotSettingsMgr.IsCurveVisible(kIdxPower)) ? 0.5 : 0;
+			//	}
+			//	break;
+			case SamplePoint::eTemp1:
+				alignH = Qt::AlignLeft;
+				scrX = chartRect.right() + (++RAxis_processed)*dX_per_RAxis;
+				shiftAxisTitle = (m_curveVisible[recording.GetColumnOfType(SamplePoint::eTemp2)])? -0.5 : 0;
+				break;
+			case SamplePoint::eTemp2:
+				alignH = Qt::AlignLeft;
+				//if (m_curveVisible[recording.GetColumnOfType(SamplePoint::eTemp1)])
+				//	--RAxis_processed;
+				scrX = chartRect.right() + (++RAxis_processed)*dX_per_RAxis;
+				shiftAxisTitle = (m_curveVisible[recording.GetColumnOfType(SamplePoint::eTemp1)])? 0.5 : 0;
+				break;
+			case SamplePoint::eAltitude:
+			default:
+				alignH = Qt::AlignLeft;
+				scrX = chartRect.right() + (++RAxis_processed)*dX_per_RAxis;
+				break;
+			}
+			if (curveType >= SamplePoint::eRPM) { // && curveType != SamplePoint::ePowerOut) {
+				Xtitle = scrX + gapX + tickValueWidth;
+				painter.setPen(QPen(QBrush(Qt::black, Qt::SolidPattern), 0, Qt::SolidLine));
+				painter.drawLine(scrX, chartRect.top(), scrX, chartRect.bottom());
+			}
+
+			int MAXvalueStrWidth = 0;
+			QPen colorPen(QBrush(curveColor[crvIdx], Qt::SolidPattern), 0, Qt::SolidLine);
+
+			const auto& ticks = m_tickV.at(crvIdx);
+			const double firstY = ticks.front();
+			const double lastY  = ticks.back();
+
+			for (short tickIdx = 0; tickIdx < ticks.size(); ++tickIdx)
+			{
+				const double t = ticks[tickIdx];
+				const int scrY = ComputeScrCoord(t, firstY, lastY, false); // vertical
+				if (scrY >= chartRect.top() && scrY <= chartRect.bottom())
+				{
+					// Draw little tick marks left of the additional Y-axes
+					if (curveType >= SamplePoint::eRPM) {
+						painter.setPen(QPen(QBrush(Qt::black, Qt::SolidPattern), 0, Qt::SolidLine));
+						painter.drawLine(scrX, scrY, scrX - ticW, scrY);
+					}
+
+					QString valueStr = QString::number(t);
+					int valueStrWidth = metrics.width(valueStr);
+					if (MAXvalueStrWidth < valueStrWidth) MAXvalueStrWidth = valueStrWidth;
+
+					// For text inside the plot area, get the bounding rectangle
+					// and fill it with background color.
+					QRect br(scrX - ((alignH == Qt::AlignRight) ? 1 : 0)*valueStrWidth - ((alignH == Qt::AlignRight) ? 1 : -1)*gapX,
+						scrY - (strPixelHeight >> 1), valueStrWidth, strPixelHeight);
+					if ((//(curveType == SamplePoint::ePowerIn && m_curveVisible[recording.GetColumnOfType(eVolts)]) ||
+						 curveType == SamplePoint::emAh_Out)  // only Power & Charge can be inside
+						&& tickIdx > 0 && tickIdx + 1 < ticks.size()) // don't do it for the 1st and the last
+					{
+						painter.setPen(bgPen);
+						painter.drawText(br, alignH | Qt::AlignVCenter, valueStr, &br);
+						painter.fillRect(br, QBrush(kGraphBkgrColor, Qt::SolidPattern));
+					}
+					painter.setPen(colorPen);
+					painter.drawText(br, alignH | Qt::AlignVCenter, valueStr);
+				}
+			}
+
+			// Draw the axis title
+			const QString txt = recording.SeriesName(colIdx);
+			int strPixelWidth = metrics.width(txt);
+			int yTitle = -height() / 2 + shiftAxisTitle*(strPixelWidth + 2 * gapX);
+
+			// Move axes titles closer to the axes, if the values are shorter than anticipated
+			//if (crvIdx != kIdxPower &&  crvIdx != kIdxPOut && crvIdx != kIdxCharge)
+			//{
+			//	if (tickValueWidth > MAXvalueStrWidth)
+			//		Xtitle += ((crvIdx == kIdxVoltage) ? 1 : -1) * (tickValueWidth - MAXvalueStrWidth);
+
+			//	if (crvIdx == kIdxVoltage)
+			//		Xtitle_Voltage = Xtitle;
+			//	else if (crvIdx == kIdxCurrent)
+			//		Xtitle_Current = Xtitle;
+			//}
+			//else //  crvIdx == kIdxPower  ||  crvIdx == kIdxCharge
+			//{
+			//	if (Xtitle_Voltage > 0 && (crvIdx == kIdxPower || crvIdx == kIdxPOut))
+			//		Xtitle = Xtitle_Voltage;
+			//	else if (Xtitle_Current > 0 && crvIdx == kIdxCharge)
+			//		Xtitle = Xtitle_Current;
+			//}
+
+			painter.rotate(-90);
+			painter.drawText(yTitle, Xtitle, strPixelWidth, strPixelHeight, Qt::AlignHCenter | Qt::AlignVCenter, txt);
+			painter.resetMatrix();
+		} // end of "crvIdx" loop
+
+
+		// Restrict all further drawing to the chart area
 		painter.setClipRect(chartRect.x() + 1, chartRect.y() + 1, chartRect.width() - 2, chartRect.height() - 2);
 
-		// Vertical then horizontal lines
+		// Vertical then horizontal grid lines . . . . . . . . . . . . . . . . . 
 		painter.setPen(QPen(QBrush(Qt::gray, Qt::SolidPattern), 0, Qt::DashLine));
 		for (size_t i = 0; i < 2; ++i)
 		{
@@ -279,7 +497,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 			}
 		}
 
-		// Draw curves
+		// Draw curves . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 		// First, pre-compute X screen coords for Seconds column
 		std::vector<double> scrX(N_points, 0.0);
 		const auto ticksSec = m_tickV.at(0);
@@ -291,25 +509,9 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 		}
 
 		// Next, process all other columns skipping 1st column, as it's X-axis
-		const size_t N_COLORS = 13;
-		static const std::array<Qt::GlobalColor, N_COLORS> curveColor = {
-			Qt::black,
-			Qt::red,
-			Qt::green,
-			Qt::blue,
-			Qt::cyan,
-			Qt::magenta,
-			Qt::yellow,
-			Qt::darkRed,
-			Qt::darkGreen,
-			Qt::darkBlue,
-			Qt::darkCyan,
-			Qt::darkMagenta,
-			Qt::darkYellow
-		};
 		for (size_t col = 1; col < N_curves; ++col) 
 		{
-			painter.setPen(QPen(QBrush(curveColor[col], Qt::SolidPattern), 0, Qt::SolidLine));
+			painter.setPen(QPen(QBrush(curveColor[col], Qt::SolidPattern), 2, Qt::SolidLine));
 			const auto&  ticks  = m_tickV.at(col);
 			const double firstY = ticks.front();
 			const double lastY  = ticks.back();

@@ -152,7 +152,11 @@ void MainWnd::FinishDownload(size_t N_recsDLed)
                         w->setWindowIcon(QIcon(":/images/face-smile.png"));
 
                         m_mdiArea->addSubWindow(w);
-                        w->show();
+						if (N_recsDLed == 1) {
+							w->showMaximized();
+						} else {
+							w->show();
+						}
                     }
                 }
             }

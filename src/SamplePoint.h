@@ -23,16 +23,16 @@ public:
         eSeconds = 0,
         eVolts   ,
         eAmps    ,
-        emAh_Out ,
-        emAh_In  ,
-        eRPM     ,
-        eAltitude,
-        eTemp1   ,
-        eTemp2   ,
-        eTemp3   ,
-        eThrottle,
-        eTempAmb ,
-        eNUM_VALUES // the last
+        emAh_Out , // recalculated
+        emAh_In  , // -"- (is rarely present)
+        eRPM     , // []
+        eAltitude, // RDU
+        eTemp1   , // []
+        eTemp2   , // []
+        eTemp3   , // []
+        eThrottle, // [RDU]
+        eTempAmb , // RDU
+        eNUM_VALUES
     };
 
     inline double& operator [](size_t idx) {

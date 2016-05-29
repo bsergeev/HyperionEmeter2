@@ -31,11 +31,15 @@ public:
 	const char* SeriesName(ColumnIdx col) const;
     size_t SeriesPrecision(ColumnIdx col) const;
 
+	SamplePoint::ValueIndex GetColumnType(ColumnIdx col) const;
+	ColumnIdx GetColumnOfType(SamplePoint::ValueIndex t) const;
+
 private:
     std::vector<SamplePoint> m_points;
 	std::array<CurveInfo, SamplePoint::eNUM_VALUES> m_curveInfo;
 
-    std::array        <bool,   SamplePoint::eNUM_VALUES> m_hasData;
-    mutable std::array<size_t, SamplePoint::eNUM_VALUES> m_column2ptIdx;
-    mutable size_t  m_numHasData = 1; // time is always there
+    size_t m_numHasData = 1; // 1 since Seconds is always there
+    std::array<bool,      SamplePoint::eNUM_VALUES> m_hasData;
+    std::array<size_t,    SamplePoint::eNUM_VALUES> m_column2ptIdx; // first m_numHasData elements are used
+	std::array<ColumnIdx, SamplePoint::eNUM_VALUES> m_pt2columnIdx; // values < m_numHasData
 };

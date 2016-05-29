@@ -37,8 +37,8 @@ public:
                      QWidget* parent = nullptr);
    ~RecordingPlotter();
 
-    QSize minimumSizeHint() const { return QSize(450, 350); }
-    QSize sizeHint       () const { return QSize(600, 400); }
+    QSize minimumSizeHint() const { return QSize(600, 400); }
+    QSize sizeHint       () const { return QSize(700, 500); }
 
     // Overrides for QAbstractItemView pure virtual functions . . . . . . . . .
     virtual void scrollTo(const QModelIndex&, ScrollHint = EnsureVisible) override {}
@@ -64,17 +64,19 @@ protected:
     //void mouseDoubleClickEvent(QMouseEvent* ) override;
 
 private:
-	void AdjustScrMargins();
-	void ComputeTicks(int minTickNumber = -1);
-	int  ComputeScrCoord(double v, double minV, double maxV, bool horizontal) const;
+	size_t GetNRightAxes() const;
+	void   AdjustScrMargins();
+	void   ComputeTicks(int minTickNumber = -1);
+	int    ComputeScrCoord(double v, double minV, double maxV, bool horizontal) const;
+
 //data:
     std::shared_ptr<RecordingDataModel> m_model;
 
 	std::vector<std::vector<double>> m_tickV; // indexed by column, i.e. only for existing curves
-	std::array<int, eNMARGINS>       m_margin;
-	QFont    m_Font;
+	std::vector<bool>         m_curveVisible; // indexed by column, i.e. only for existing curves
 
-    QWidget* m_ParentWnd = nullptr; // <<< DEBUG needed?
+	std::array<int, eNMARGINS> m_margin;
+	QFont                      m_Font;
 
 	bool m_showTooltip  = true;
 	bool m_showTitle    = true;
@@ -82,9 +84,6 @@ private:
 
 public: // statics
 	static QString SecondsTxt(double sec);
-
-    static const short GAP_X; // = 4;
-    static const int NO_STEPS_PROCESSED; // = -1;
 };
 
 //------------------------------------------------------------------------------

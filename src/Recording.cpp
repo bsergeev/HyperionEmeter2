@@ -13,8 +13,8 @@ Recording::Recording(std::vector<SamplePoint>&& points)
     // Set default column to SamplePoint index mapping
     for (size_t i = 0; i < SamplePoint::eNUM_VALUES; ++i) {
         m_column2ptIdx[i] = i;
+		m_pt2columnIdx[i] = ColumnIdx{ i };
     }
-
 }
 //------------------------------------------------------------------------------
 // return whether anything was changed
@@ -105,13 +105,15 @@ bool Recording::MassageData()
     }
 
     // Find which series have (non-const) data
-    m_numHasData = 1;
+	m_pt2columnIdx.fill(ColumnIdx{ 0 });
+	m_numHasData = 1;
     for (size_t j = 1; j < SamplePoint::eNUM_VALUES; ++j) {
         m_hasData[j] = false;
         for (size_t i = 1; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
             if (fabs(pt[j] - pt0[j]) > 0.001) { // as the max accuracy is 0.01
 				m_hasData[j] = true;
+				m_pt2columnIdx[j] = ColumnIdx{ m_numHasData };
                 m_column2ptIdx[m_numHasData++] = j;
                 break;
             }
@@ -219,5 +221,17 @@ size_t Recording::SeriesPrecision(ColumnIdx col) const
         precision = SamplePoint::sSeriesPrecision[m_column2ptIdx[col]];
     }
     return precision;
+}
+//------------------------------------------------------------------------------
+SamplePoint::ValueIndex Recording::GetColumnType(ColumnIdx col) const
+{
+	assert(col < SamplePoint::eNUM_VALUES && "Invalid column");
+	return static_cast<SamplePoint::ValueIndex>(m_column2ptIdx[col]);
+}
+//------------------------------------------------------------------------------
+ColumnIdx Recording::GetColumnOfType(SamplePoint::ValueIndex t) const
+{
+	assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
+	return m_pt2columnIdx[t];
 }
 //------------------------------------------------------------------------------

@@ -30,4 +30,18 @@ RecordingDisplayWnd::RecordingDisplayWnd(std::unique_ptr<RecordingTableView> tab
     }
 }
 
+void RecordingDisplayWnd::ResizeTable()
+{
+	if (m_Table != nullptr) {
+		m_Table->resizeColumnsToContents();
+		int w = m_Table->GetTotalWidth();
+		QList<int> widths;   widths << w << m_Splitter->width() - w;
+		m_Splitter->setSizes(widths);
+	}
+}
 
+void RecordingDisplayWnd::resizeEvent(QResizeEvent* evt)
+{
+	QWidget::resizeEvent(evt);
+	ResizeTable();
+}
