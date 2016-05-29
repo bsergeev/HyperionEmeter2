@@ -5,6 +5,7 @@
 #include <QPaintEvent>
 #include <QResizeEvent>
 #include <QPainter>
+#include <QTextStream>
 #include <QColor>
 #include <QAction>
 #include <QToolTip>
@@ -186,49 +187,145 @@ int RecordingPlotter::ComputeScrCoord(double v, double minV, double maxV, bool h
 	return scrCoord;
 }
 //------------------------------------------------------------------------------
+//static 
+QString RecordingPlotter::SecondsTxt(double sec)
+{
+	QString txt;
+	QTextStream s(&txt, QIODevice::WriteOnly);
+	s.setPadChar('0');
+	s.setFieldAlignment(QTextStream::AlignRight);
+
+	if (sec >= 60.0)
+	{
+		int hours = (int)floor(sec / 3600);
+		int minutes = (int)floor((sec - hours * 3600) / 60);
+		sec -= hours * 3600 + minutes * 60;
+		if (hours) {
+			s << hours << ":" << qSetFieldWidth(2);
+		}
+		s << minutes << qSetFieldWidth(0) << ":" << qSetFieldWidth(2) << sec;
+	}
+	else // less than a minute
+	{
+		txt = QString("%1").arg(sec);
+	}
+
+	return txt;
+}
+//------------------------------------------------------------------------------
 void RecordingPlotter::paintEvent(QPaintEvent*)
 {
-	//QImage image(width(), height(), QImage::Format_RGB32);
-	QPainter painter(viewport()); //  &image);
+	AdjustScrMargins();
 
-	// Draw grid
+	QPainter painter(viewport());
+
+	// Draw chart area
 	const QRect scrRect{ 0, 0, width(), height() };
-	QRect chartRect = scrRect.adjusted(m_margin[eLEFT],
-									   m_margin[eUP],
-									  -m_margin[eRIGHT],
-									  -m_margin[eDOWN]);
-	painter.fillRect(QRect(0,0,width(), height()), Qt::white);
+	painter.fillRect(scrRect, Qt::white);
 
-	// Draw grid .......................................................
+	QRect chartRect = scrRect.adjusted(m_margin[eLEFT], m_margin[eUP], -m_margin[eRIGHT], -m_margin[eDOWN]);
 	painter.fillRect(chartRect, QColor("#F4F4FF")); //  MainWnd::kGraphBkgrColor
+
 	painter.setPen(Qt::black);
 	painter.drawRect(chartRect);
 
-	// First, draw the grid lines - - - - - - - - - - - - - - - - - - - - - - -
-	painter.setClipRect(chartRect.x() + 1, chartRect.y() + 1, chartRect.width() - 2, chartRect.height() - 2);
+	// Tick values and names . . . . . . . . . . . . . . . . . . . . . . . . . .
+	QFontMetrics metrics = painter.fontMetrics();
 
-	// Vertical then horizontal lines
-	for (size_t i=0; i<2; ++i)
+	if (RecordingDataModel* const model = m_model.get())
 	{
-		const auto& tics = m_tickV[i]; // seconds then 1st vertical
-		const double minV = tics.front();
-		const double maxV = tics.back();
-		for (size_t tickIdx = 0; tickIdx < tics.size(); ++tickIdx)
+		const Recording& recording = model->GetRecording();
+		const size_t N_points = recording.size();
+		const size_t N_curves = recording.numColums();
+		const ColumnIdx ci0 = ColumnIdx{ 0 };
+
+		// Tick values along X-axis
+		painter.setPen(Qt::black);
+		const auto& ticsX = m_tickV.at(0);
+		const double minX = ticsX.front();
+		const double maxX = ticsX.back();
+		for (auto t : ticsX)
 		{
-			double t = tics[tickIdx];
-			if (minV <= t  &&  t <= maxV)
+			const int x = ComputeScrCoord(t, minX, maxX, true); // horizontal
+			QString txt = SecondsTxt(t);
+			painter.drawText(x-50, chartRect.bottom()+5, 100, metrics.height(), Qt::AlignHCenter|Qt::AlignTop, txt);
+		}
+		// Draw horizontal axis title
+		QRect bottomRect(0, height() - metrics.height() - 1, width(), metrics.height());
+		painter.drawText(bottomRect, Qt::AlignHCenter|Qt::AlignVCenter, recording.SeriesName(ci0));
+
+
+		painter.setClipRect(chartRect.x() + 1, chartRect.y() + 1, chartRect.width() - 2, chartRect.height() - 2);
+
+		// Vertical then horizontal lines
+		painter.setPen(QPen(QBrush(Qt::gray, Qt::SolidPattern), 0, Qt::DashLine));
+		for (size_t i = 0; i < 2; ++i)
+		{
+			const auto& tics = m_tickV[i]; // seconds then 1st vertical
+			const double minV = tics.front();
+			const double maxV = tics.back();
+			for (size_t tickIdx = 0; tickIdx < tics.size(); ++tickIdx)
 			{
-				int v = ComputeScrCoord(t, minV, maxV, i==0); // 0 => horizontal
-				painter.setPen(QPen(QBrush(Qt::gray, Qt::SolidPattern), 0, Qt::DashLine));
-				if (i == 0) {
-					painter.drawLine(v, chartRect.top(), v, chartRect.bottom());
-				} else {
-					painter.drawLine(chartRect.left(), v, chartRect.right(), v);
+				double t = tics[tickIdx];
+				if (minV <= t  &&  t <= maxV)
+				{
+					int v = ComputeScrCoord(t, minV, maxV, i == 0); // 0 => horizontal
+					if (i == 0) {
+						painter.drawLine(v, chartRect.top(), v, chartRect.bottom());
+					} else {
+						painter.drawLine(chartRect.left(), v, chartRect.right(), v);
+					}
 				}
 			}
 		}
-    }
+
+		// Draw curves
+		// First, pre-compute X screen coords for Seconds column
+		std::vector<double> scrX(N_points, 0.0);
+		const auto ticksSec = m_tickV.at(0);
+		const double firstSec = ticksSec.front();
+		const double lastSec  = ticksSec.back();
+		for (size_t row = 0; row < N_points; ++row) {
+			const double x = recording.GetValue(row, ci0);
+			scrX[row] = ComputeScrCoord(x, firstSec, lastSec, true); // horizontal
+		}
+
+		// Next, process all other columns skipping 1st column, as it's X-axis
+		const size_t N_COLORS = 13;
+		static const std::array<Qt::GlobalColor, N_COLORS> curveColor = {
+			Qt::black,
+			Qt::red,
+			Qt::green,
+			Qt::blue,
+			Qt::cyan,
+			Qt::magenta,
+			Qt::yellow,
+			Qt::darkRed,
+			Qt::darkGreen,
+			Qt::darkBlue,
+			Qt::darkCyan,
+			Qt::darkMagenta,
+			Qt::darkYellow
+		};
+		for (size_t col = 1; col < N_curves; ++col) 
+		{
+			painter.setPen(QPen(QBrush(curveColor[col], Qt::SolidPattern), 0, Qt::SolidLine));
+			const auto&  ticks  = m_tickV.at(col);
+			const double firstY = ticks.front();
+			const double lastY  = ticks.back();
+
+			const ColumnIdx colIdx = ColumnIdx{ col };
+			int prevY = 0;
+			for (size_t row = 0; row < N_points; ++row) 
+			{
+				const double y = recording.GetValue(row, colIdx);
+				const int scrY = ComputeScrCoord(y, firstY, lastY, false); // vertical
+				if (row > 0) {
+					painter.drawLine(scrX[row-1], prevY, scrX[row], scrY);
+				}
+				prevY = scrY;
+			}
+		}
+	}
 
 }
-
-

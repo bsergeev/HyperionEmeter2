@@ -3,6 +3,7 @@
 #include <QAbstractItemView>
 #include <QWidget>
 #include <QImage>
+#include <QString>
 #include <QColor>
 #include <QScrollBar>
 #include <QTimer>
@@ -69,7 +70,7 @@ private:
 //data:
     std::shared_ptr<RecordingDataModel> m_model;
 
-	std::vector<std::vector<double>> m_tickV;
+	std::vector<std::vector<double>> m_tickV; // indexed by column, i.e. only for existing curves
 	std::array<int, eNMARGINS>       m_margin;
 	QFont    m_Font;
 
@@ -80,6 +81,8 @@ private:
 	bool m_showSubTitle = true;
 
 public: // statics
+	static QString SecondsTxt(double sec);
+
     static const short GAP_X; // = 4;
     static const int NO_STEPS_PROCESSED; // = -1;
 };
