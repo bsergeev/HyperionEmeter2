@@ -235,3 +235,19 @@ ColumnIdx Recording::GetColumnOfType(SamplePoint::ValueIndex t) const
 	return m_pt2columnIdx[t];
 }
 //------------------------------------------------------------------------------
+bool Recording::HasDataOfType(SamplePoint::ValueIndex t) const
+{
+	assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
+	return m_hasData[t];
+}
+//------------------------------------------------------------------------------
+void Recording::CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk)
+{
+	assert(m_hasData[SamplePoint::eRPM] && "Can only calculate, when RPM was measured");
+	for (auto& pt : m_points) {
+		const PowerOutAndThrust pw_th = calcCBk(pt[SamplePoint::eRPM]);
+		pt[SamplePoint::ePowerOut] = pw_th.powerOut;
+		pt[SamplePoint::eThrust  ] = pw_th.thrust;
+	}
+}
+//------------------------------------------------------------------------------

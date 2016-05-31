@@ -5,10 +5,11 @@
 
 //static
 const std::array<size_t, SamplePoint::eNUM_VALUES> SamplePoint::sSeriesPrecision = {
-    2, 2, 2, 2, 0, 0, 0, 1, 1, 1, 0, 1
+    2, 2, 2, 2, 0, 0, 0, 1, 1, 1, 0, 1,   1, 1, 0, 1
 };
 const std::array<const char*, SamplePoint::eNUM_VALUES> SamplePoint::sSeriesNames = {
-    "Seconds", "Voltage, V", "Current, A", "Discharge, mAh", "Charge, mAh", "RPM", "Altitude, m", "Temp1, C", "Temp2, C", "Temp3, C", "Throttle, uS", "Amb.Temp, C"
+    "Seconds", "Voltage, V", "Current, A", "Discharge, mAh", "Charge, mAh", "RPM", "Altitude, m", "Temp1, C", "Temp2, C", "Temp3, C", "Throttle, uS", "Amb.Temp, C",
+	"Power In, W", "Power Out, W", "Efficiency, %", "Thrust, N"
 };
 
 SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data)
@@ -30,4 +31,9 @@ SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data
     m_values[eTemp3   ] = twoUChars2Int(data[18], data[19]) / 10.0;
     m_values[eThrottle] = twoUChars2Int(data[20], data[21]);
     m_values[eTempAmb ] = twoUChars2Int(data[22], data[23]) / 10.0; // TODO: verify negative
+
+	m_values[ePowerIn ] = m_values[eVolts] * m_values[eAmps];
+	m_values[ePowerOut]   = -1.0; // unknown
+	m_values[eEfficiency] = -1.0; // unknown
+	m_values[eThrust  ]   = -1.0; // unknown
 }

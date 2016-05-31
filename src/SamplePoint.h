@@ -26,13 +26,18 @@ public:
         emAh_Out , // recalculated
         emAh_In  , // -"- (is rarely present)
         eRPM     , // []
-        eAltitude, // RDU
+        eAltitude, //  RDU
         eTemp1   , // []
         eTemp2   , // []
         eTemp3   , // []
         eThrottle, // [RDU]
-        eTempAmb , // RDU
-        eNUM_VALUES
+        eTempAmb , //  RDU
+
+		ePowerIn,
+		ePowerOut, // [PRM]
+		eEfficiency,//[PRM]
+		eThrust,   // [RPM] 
+		eNUM_VALUES
     };
 
     inline double& operator [](size_t idx) {

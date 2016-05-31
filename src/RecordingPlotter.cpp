@@ -55,7 +55,7 @@ void RecordingPlotter::AdjustScrMargins()
 
 	// Depending on the current curve visibility (and active sensors)
 	// there may be up to two extra Y-axes to the right
-	m_margin[eRIGHT] = GetNRightAxes()*(w + h + 2*gapX);
+	m_margin[eRIGHT] = static_cast<int>(GetNRightAxes()*(w + h + 2*gapX));
 }
 //------------------------------------------------------------------------------
 QModelIndex RecordingPlotter::indexAt(const QPoint&) const
@@ -304,11 +304,11 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 		const size_t gapX = 4;
 		const size_t ticW = 4;
 		const size_t N_rAxes = GetNRightAxes();
-		const size_t dX_per_RAxis = static_cast<size_t>(floor(m_margin[eRIGHT] / static_cast<double>(N_rAxes)));
+		const int dX_per_RAxis = static_cast<int>(floor(m_margin[eRIGHT] / static_cast<double>(N_rAxes)));
 
 		unsigned short RAxis_processed = 0;
-		short Xtitle_Voltage = -1;
-		short Xtitle_Current = -1;
+		int Xtitle_Voltage = -1;
+		int Xtitle_Current = -1;
 
 		QPen bgPen(QBrush(Qt::white, Qt::SolidPattern), 0, Qt::SolidLine);
 		for (size_t crvIdx = 1; crvIdx < N_curves; ++crvIdx)
@@ -322,8 +322,8 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 			// These will be set depending on which Y-axis we are drawing
 			Qt::AlignmentFlag alignH = Qt::AlignRight;
 			float shiftAxisTitle = 0.0;
-			short scrX = 0;
-			short Xtitle = 0;
+			int scrX = 0;
+			int Xtitle = 0;
 
 			switch (curveType)
 			{
@@ -337,7 +337,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 			case SamplePoint::eAmps:
 				alignH = Qt::AlignLeft;
 				scrX = chartRect.right();
-				Xtitle = Xtitle_Current = scrX + gapX + tickValueWidth;
+				Xtitle_Current = static_cast<int>(Xtitle = scrX + gapX + tickValueWidth);
 				shiftAxisTitle = (m_curveVisible[recording.GetColumnOfType(SamplePoint::emAh_Out)])? -0.5 : 0;
 				break;
 			//case kIdxPower:

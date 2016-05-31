@@ -12,6 +12,10 @@ struct CurveInfo {
 	double minV = std::numeric_limits<double>::max();
 	double maxV = std::numeric_limits<double>::min();
 };
+struct PowerOutAndThrust {
+	double powerOut = 0.0;
+	double thrust = 0.0;
+};
 
 class Recording 
 {
@@ -19,20 +23,22 @@ public:
     explicit Recording(std::vector<SamplePoint>&& points);
 
     bool MassageData(); // return whether anything was changed
+	void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
+
 
     void PrintHeader(std::ostream& os, bool skipEmpty = true) const;
     void PrintData  (std::ostream& os, bool skipEmpty = true) const;
 
     size_t size()      const { return m_points.size(); }
-    size_t numColums() const { return m_numHasData;  }
+    size_t numColums() const { return m_numHasData;    }
 
-	double   GetValue(size_t row, ColumnIdx col) const;
-	const CurveInfo& GetCurveInfo(ColumnIdx col) const;
-	const char* SeriesName(ColumnIdx col) const;
-    size_t SeriesPrecision(ColumnIdx col) const;
-
+	double           GetValue(size_t row, ColumnIdx col) const;
+	const CurveInfo&         GetCurveInfo(ColumnIdx col) const;
+	const char*                SeriesName(ColumnIdx col) const;
+    size_t                SeriesPrecision(ColumnIdx col) const;
 	SamplePoint::ValueIndex GetColumnType(ColumnIdx col) const;
 	ColumnIdx GetColumnOfType(SamplePoint::ValueIndex t) const;
+	bool      HasDataOfType  (SamplePoint::ValueIndex t) const;
 
 private:
     std::vector<SamplePoint> m_points;

@@ -40,7 +40,7 @@ QVariant RecordingDataModel::data(const QModelIndex& index, int role) const
         const size_t row = static_cast<size_t>(index.row());
         const size_t col = static_cast<size_t>(index.column());
         return QVariant(QString::number(m_recording.GetValue(row, ColumnIdx(col)), 'f', 
-                                        m_recording.SeriesPrecision(ColumnIdx(col))));
+                                        static_cast<int>(m_recording.SeriesPrecision(ColumnIdx(col)))));
 #else
         Measurement const& m = thisFlight[index.row()];
         double t = m[kIdxTime];
