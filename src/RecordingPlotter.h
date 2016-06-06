@@ -24,13 +24,13 @@ class RecordingDataModel;
 class RecordingPlotter : public QAbstractItemView
 {
 //    Q_OBJECT
-	enum eMarginIdx {
-		eLEFT = 0,
-		eRIGHT,
-		eUP,
-		eDOWN,
-		eNMARGINS // should be last
-	};
+    enum eMarginIdx {
+        eLEFT = 0,
+        eRIGHT,
+        eUP,
+        eDOWN,
+        eNMARGINS // should be last
+    };
 
 public:
     RecordingPlotter(const std::shared_ptr<RecordingDataModel>& model, 
@@ -39,6 +39,12 @@ public:
 
     QSize minimumSizeHint() const { return QSize(600, 400); }
     QSize sizeHint       () const { return QSize(700, 500); }
+
+	bool IsCurveVisible (size_t curveIdx) const;
+	void SetCurveVisible(size_t curveIdx, bool visible);
+
+    void   AdjustScrMargins();
+    void   ComputeTicks(int minTickNumber = -1);
 
     // Overrides for QAbstractItemView pure virtual functions . . . . . . . . .
     virtual void scrollTo(const QModelIndex&, ScrollHint = EnsureVisible) override {}
@@ -64,26 +70,24 @@ protected:
     //void mouseDoubleClickEvent(QMouseEvent* ) override;
 
 private:
-	size_t GetNRightAxes() const;
-	void   AdjustScrMargins();
-	void   ComputeTicks(int minTickNumber = -1);
-	int    ComputeScrCoord(double v, double minV, double maxV, bool horizontal) const;
+    size_t GetNRightAxes() const;
+    int    ComputeScrCoord(double v, double minV, double maxV, bool horizontal) const;
 
 //data:
     std::shared_ptr<RecordingDataModel> m_model;
 
-	std::vector<std::vector<double>> m_tickV; // indexed by column, i.e. only for existing curves
-	std::vector<bool>         m_curveVisible; // indexed by column, i.e. only for existing curves
+    std::vector<std::vector<double>> m_tickV; // indexed by column, i.e. only for existing curves
+    std::vector<bool>         m_curveVisible; // indexed by column, i.e. only for existing curves
 
-	std::array<int, eNMARGINS> m_margin;
-	QFont                      m_Font;
+    std::array<int, eNMARGINS> m_margin;
+    QFont                      m_Font;
 
-	bool m_showTooltip  = true;
-	bool m_showTitle    = true;
-	bool m_showSubTitle = true;
+    bool m_showTooltip  = true;
+    bool m_showTitle    = true;
+    bool m_showSubTitle = true;
 
 public: // statics
-	static QString SecondsTxt(double sec);
+    static QString SecondsTxt(double sec);
 };
 
 //------------------------------------------------------------------------------

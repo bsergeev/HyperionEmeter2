@@ -9,12 +9,12 @@
 #include <vector>
 
 struct CurveInfo {
-	double minV = std::numeric_limits<double>::max();
-	double maxV = std::numeric_limits<double>::min();
+    double minV = std::numeric_limits<double>::max();
+    double maxV = std::numeric_limits<double>::min();
 };
 struct PowerOutAndThrust {
-	double powerOut = 0.0;
-	double thrust = 0.0;
+    double powerOut = 0.0;
+    double thrust = 0.0;
 };
 
 class Recording 
@@ -23,7 +23,7 @@ public:
     explicit Recording(std::vector<SamplePoint>&& points);
 
     bool MassageData(); // return whether anything was changed
-	void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
+    void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
 
 
     void PrintHeader(std::ostream& os, bool skipEmpty = true) const;
@@ -32,20 +32,20 @@ public:
     size_t size()      const { return m_points.size(); }
     size_t numColums() const { return m_numHasData;    }
 
-	double           GetValue(size_t row, ColumnIdx col) const;
-	const CurveInfo&         GetCurveInfo(ColumnIdx col) const;
-	const char*                SeriesName(ColumnIdx col) const;
+    double           GetValue(size_t row, ColumnIdx col) const;
+    const CurveInfo&         GetCurveInfo(ColumnIdx col) const;
+    const char*                SeriesName(ColumnIdx col) const;
     size_t                SeriesPrecision(ColumnIdx col) const;
-	SamplePoint::ValueIndex GetColumnType(ColumnIdx col) const;
-	ColumnIdx GetColumnOfType(SamplePoint::ValueIndex t) const;
-	bool      HasDataOfType  (SamplePoint::ValueIndex t) const;
+    SamplePoint::ValueIndex GetColumnType(ColumnIdx col) const;
+    ColumnIdx GetColumnOfType(SamplePoint::ValueIndex t) const;
+    bool      HasDataOfType  (SamplePoint::ValueIndex t) const;
 
 private:
     std::vector<SamplePoint> m_points;
-	std::array<CurveInfo, SamplePoint::eNUM_VALUES> m_curveInfo;
+    std::array<CurveInfo, SamplePoint::eNUM_VALUES> m_curveInfo;
 
     size_t m_numHasData = 1; // 1 since Seconds is always there
     std::array<bool,      SamplePoint::eNUM_VALUES> m_hasData;
     std::array<size_t,    SamplePoint::eNUM_VALUES> m_column2ptIdx; // first m_numHasData elements are used
-	std::array<ColumnIdx, SamplePoint::eNUM_VALUES> m_pt2columnIdx; // values < m_numHasData
+    std::array<ColumnIdx, SamplePoint::eNUM_VALUES> m_pt2columnIdx; // values < m_numHasData
 };

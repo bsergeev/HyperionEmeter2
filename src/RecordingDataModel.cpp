@@ -6,6 +6,31 @@
 RecordingDataModel::RecordingDataModel(const Recording& rec)
     : m_recording(rec)
 {
+    m_curveColor = {
+        Qt::black,
+        Qt::blue,
+        Qt::red,
+        Qt::darkRed,
+        Qt::darkCyan,
+        Qt::magenta,
+        Qt::darkYellow,
+        Qt::darkGreen,
+        Qt::green,
+        Qt::darkBlue,
+        Qt::cyan,
+        Qt::darkMagenta,
+        Qt::yellow
+    };
+}
+//------------------------------------------------------------------------------
+QColor RecordingDataModel::GetColumnColor(size_t columnIndex) const
+{
+    return m_curveColor.at(columnIndex % N_COLORS);
+}
+
+void RecordingDataModel::SetColumnColor(size_t columnIndex, const QColor& clr)
+{
+	m_curveColor.at(columnIndex % N_COLORS) = clr;
 }
 //------------------------------------------------------------------------------
 int RecordingDataModel::rowCount(const QModelIndex&) const

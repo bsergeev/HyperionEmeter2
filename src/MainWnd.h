@@ -3,6 +3,8 @@
 #include "HypReader.h"
 
 #include <QMainWindow>
+#include <QColor>
+
 #include <memory>
 
 class QWidget;
@@ -60,4 +62,8 @@ private:
 
 //static:
     static bool  kAskForConfgirmation;
+public:
+    static QColor  kGraphBkgrColor;
+    static QColor  kGraphGridColor;
+    static QColor  kGraphFrameColor;
 };

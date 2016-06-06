@@ -1,5 +1,5 @@
 #ifndef COMUTILS_H
-#define	COMUTILS_H
+#define    COMUTILS_H
 
 #include "HypCommands.h" // RECORD_LENGTH
 

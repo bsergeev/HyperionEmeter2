@@ -13,7 +13,7 @@ Recording::Recording(std::vector<SamplePoint>&& points)
     // Set default column to SamplePoint index mapping
     for (size_t i = 0; i < SamplePoint::eNUM_VALUES; ++i) {
         m_column2ptIdx[i] = i;
-		m_pt2columnIdx[i] = ColumnIdx{ i };
+        m_pt2columnIdx[i] = ColumnIdx{ i };
     }
 }
 //------------------------------------------------------------------------------
@@ -105,35 +105,35 @@ bool Recording::MassageData()
     }
 
     // Find which series have (non-const) data
-	m_pt2columnIdx.fill(ColumnIdx{ 0 });
-	m_numHasData = 1;
+    m_pt2columnIdx.fill(ColumnIdx{ 0 });
+    m_numHasData = 1;
     for (size_t j = 1; j < SamplePoint::eNUM_VALUES; ++j) {
         m_hasData[j] = false;
         for (size_t i = 1; i < N_points; ++i) {
             const SamplePoint& pt = m_points[i];
             if (fabs(pt[j] - pt0[j]) > 0.001) { // as the max accuracy is 0.01
-				m_hasData[j] = true;
-				m_pt2columnIdx[j] = ColumnIdx{ m_numHasData };
+                m_hasData[j] = true;
+                m_pt2columnIdx[j] = ColumnIdx{ m_numHasData };
                 m_column2ptIdx[m_numHasData++] = j;
                 break;
             }
         }
     }
 
-	// Record min/max values for all curves
+    // Record min/max values for all curves
     for (size_t j = 0; j < SamplePoint::eNUM_VALUES; ++j) {
-		double minV =  std::numeric_limits<double>::max();
-		double maxV = -std::numeric_limits<double>::max();
-		for (size_t i = 0; i < N_points; ++i) {
+        double minV =  std::numeric_limits<double>::max();
+        double maxV = -std::numeric_limits<double>::max();
+        for (size_t i = 0; i < N_points; ++i) {
             const double v = m_points[i][j];
-			if (minV > v) {	minV = v; }
-			if (maxV < v) { maxV = v; }
-		}
-		assert(minV <= maxV);
-		CurveInfo& ci = m_curveInfo[j];
-		ci.minV = minV;
-		ci.maxV = maxV;
-	}
+            if (minV > v) {    minV = v; }
+            if (maxV < v) { maxV = v; }
+        }
+        assert(minV <= maxV);
+        CurveInfo& ci = m_curveInfo[j];
+        ci.minV = minV;
+        ci.maxV = maxV;
+    }
 
 
     return changed;
@@ -196,13 +196,13 @@ double Recording::GetValue(size_t row, ColumnIdx col) const
 //------------------------------------------------------------------------------
 const CurveInfo& Recording::GetCurveInfo(ColumnIdx col) const
 {
-	if (0 <= col && col < numColums()) {
-		return m_curveInfo[m_column2ptIdx[col]];
-	} else {
-		assert(!"Invalid column index");
-		const static CurveInfo error;
-		return error;
-	}
+    if (0 <= col && col < numColums()) {
+        return m_curveInfo[m_column2ptIdx[col]];
+    } else {
+        assert(!"Invalid column index");
+        const static CurveInfo error;
+        return error;
+    }
 }
 //------------------------------------------------------------------------------
 const char* Recording::SeriesName(ColumnIdx col) const
@@ -225,29 +225,29 @@ size_t Recording::SeriesPrecision(ColumnIdx col) const
 //------------------------------------------------------------------------------
 SamplePoint::ValueIndex Recording::GetColumnType(ColumnIdx col) const
 {
-	assert(col < SamplePoint::eNUM_VALUES && "Invalid column");
-	return static_cast<SamplePoint::ValueIndex>(m_column2ptIdx[col]);
+    assert(col < SamplePoint::eNUM_VALUES && "Invalid column");
+    return static_cast<SamplePoint::ValueIndex>(m_column2ptIdx[col]);
 }
 //------------------------------------------------------------------------------
 ColumnIdx Recording::GetColumnOfType(SamplePoint::ValueIndex t) const
 {
-	assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
-	return m_pt2columnIdx[t];
+    assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
+    return m_pt2columnIdx[t];
 }
 //------------------------------------------------------------------------------
 bool Recording::HasDataOfType(SamplePoint::ValueIndex t) const
 {
-	assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
-	return m_hasData[t];
+    assert(0 <= t && t < SamplePoint::eNUM_VALUES && "Invalid type");
+    return m_hasData[t];
 }
 //------------------------------------------------------------------------------
 void Recording::CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk)
 {
-	assert(m_hasData[SamplePoint::eRPM] && "Can only calculate, when RPM was measured");
-	for (auto& pt : m_points) {
-		const PowerOutAndThrust pw_th = calcCBk(pt[SamplePoint::eRPM]);
-		pt[SamplePoint::ePowerOut] = pw_th.powerOut;
-		pt[SamplePoint::eThrust  ] = pw_th.thrust;
-	}
+    assert(m_hasData[SamplePoint::eRPM] && "Can only calculate, when RPM was measured");
+    for (auto& pt : m_points) {
+        const PowerOutAndThrust pw_th = calcCBk(pt[SamplePoint::eRPM]);
+        pt[SamplePoint::ePowerOut] = pw_th.powerOut;
+        pt[SamplePoint::eThrust  ] = pw_th.thrust;
+    }
 }
 //------------------------------------------------------------------------------

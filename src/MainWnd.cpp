@@ -11,7 +11,10 @@
 #include <QtWidgets>
 
 // static
-bool MainWnd::kAskForConfgirmation = true;
+bool   MainWnd::kAskForConfgirmation = true;
+QColor MainWnd::kGraphBkgrColor  = QColor("#F4F4FF");
+QColor MainWnd::kGraphGridColor  = Qt::gray;
+QColor MainWnd::kGraphFrameColor = Qt::black;
 
 MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)
@@ -147,16 +150,16 @@ void MainWnd::FinishDownload(size_t N_recsDLed)
                 auto tableView = std::make_unique<RecordingTableView>(dataModel);
                 auto plotter   = std::make_unique<RecordingPlotter>  (dataModel);
                 if (tableView.get() != nullptr && plotter.get() != nullptr) {
-                    if (auto w = new RecordingDisplayWnd(std::move(tableView), std::move(plotter), this)) {
+                    if (auto w = new RecordingDisplayWnd(dataModel, std::move(tableView), std::move(plotter), this)) {
                         w->setWindowTitle(QObject::tr("Recording %1").arg(i + 1));
                         w->setWindowIcon(QIcon(":/images/face-smile.png"));
 
                         m_mdiArea->addSubWindow(w);
-						if (N_recsDLed == 1) {
-							w->showMaximized();
-						} else {
-							w->show();
-						}
+                        if (N_recsDLed == 1) {
+                            w->showMaximized();
+                        } else {
+                            w->show();
+                        }
                     }
                 }
             }

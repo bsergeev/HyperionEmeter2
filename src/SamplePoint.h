@@ -33,11 +33,11 @@ public:
         eThrottle, // [RDU]
         eTempAmb , //  RDU
 
-		ePowerIn,
-		ePowerOut, // [PRM]
-		eEfficiency,//[PRM]
-		eThrust,   // [RPM] 
-		eNUM_VALUES
+        ePowerIn,
+        ePowerOut, // [PRM]
+        eEfficiency,//[PRM]
+        eThrust,   // [RPM] 
+        eNUM_VALUES
     };
 
     inline double& operator [](size_t idx) {

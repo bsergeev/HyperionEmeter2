@@ -10,10 +10,10 @@ RecordingTableView::RecordingTableView(const std::shared_ptr<RecordingDataModel>
       setModel(model.get());
       setAttribute(Qt::WA_DeleteOnClose);
 
-	  verticalHeader()->hide();
-	  setAlternatingRowColors(true);
-	  setStyleSheet("selection-background-color: lightblue");
-	  setStyleSheet("QHeaderView::section { background-color:lightgray }");
+      verticalHeader()->hide();
+      setAlternatingRowColors(true);
+      setStyleSheet("selection-background-color: lightblue");
+      setStyleSheet("QHeaderView::section { background-color:lightgray }");
 }
 
 int RecordingTableView::GetTotalWidth() const
