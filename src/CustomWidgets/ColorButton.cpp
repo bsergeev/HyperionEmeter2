@@ -23,16 +23,14 @@ void ColorButton::mousePressEvent(QMouseEvent* event)
         QPalette pal = palette();
         QColor color = QColorDialog::getColor(pal.color(QPalette::Window), this);
         if (color.isValid()) {
-
-            pal.setColor(QPalette::Background, m_Color = color);
-            setPalette(pal);
-
-            //setPalette(QPalette(m_Color = color));
-        }
+			setPalette(QPalette(m_Color = color));
+        } else {
+			Q_ASSERT(!"Invalid color");
+		}
     }
 }
 
-void ColorButton::paintEvent(QPaintEvent *)
+void ColorButton::paintEvent(QPaintEvent*)
 {
     QStyleOption opt;
     opt.init(this);

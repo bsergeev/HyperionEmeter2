@@ -14,11 +14,6 @@
 #include <QRadioButton>
 #include <QGroupBox>
 
-//#include "ChannelRecordingChildWnd.h"
-//#include "WattmeterDefs.h"
-//#include "MeasurementPlotSettingsMgr.h"
-//#include "MeasurementRecordingPlotter.h"
-
 //------------------------------------------------------------------------------
 
 RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool showGraph
@@ -107,17 +102,16 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
 
                 for (size_t i=1;  i < N_curves;  ++i)
                 {
-                    bool visible = true; // <<< DEBUG TBD  !psMgr.isXAxis(i) && mayExist[i];
+                    const bool visible = true; // <<< DEBUG TBD  !psMgr.isXAxis(i) && mayExist[i];
                     ColorButton* btn  = new ColorButton( dataModel->GetColumnColor(i), this );
-                                btn->setVisible(visible);
-                    m_ColorBtns[i] = btn;
-                    grLay->addWidget( btn, i, 0 );
+                    btn->setVisible(visible);
+                    grLay->addWidget(m_ColorBtns[i] = btn, i, 0);
 
                     QCheckBox* chBx = new QCheckBox(recording.SeriesName(ColumnIdx(i)), this );
-                                chBx->setChecked(plotter->IsCurveVisible(i) );
-                                chBx->setVisible(visible);
+                               chBx->setChecked(plotter->IsCurveVisible(i) );
+                               chBx->setVisible(visible);
                     m_CurveVisibleChBxs[i] = chBx;
-                    grLay->addWidget( chBx, i, 1, Qt::AlignLeft );
+                    grLay->addWidget(chBx, i, 1, Qt::AlignLeft);
                 }
 
             curveGrpBox->setLayout(grLay);
@@ -187,8 +181,6 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
 
         layPlotV->addLayout(layPlot);
 
-      
-      
         m_ShowTooltip = new QCheckBox( tr("When mouse over plot, show nearest point value in the tool tip"), this );
         m_ShowTooltip->setChecked(true); // <<< DEBUG TBD  MeasurementRecordingPlotter::kShowTooltip );
         layPlotV->addWidget(m_ShowTooltip);
@@ -197,7 +189,6 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
         layTableGraph2columns->addWidget(m_PlotGrpBox);
 
     layout->addLayout(layTableGraph2columns);
-
 
     // Units .................................................................
     QVBoxLayout* unitsVLayout = new QVBoxLayout;
