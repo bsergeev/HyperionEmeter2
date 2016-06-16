@@ -69,7 +69,7 @@ void RecordingDisplayWnd::SetGraphOptions()
 		{
 			m_dataModel->SetColumnColor(crvIdx, dlg.GetCurveColor(crvIdx));
 			m_Plotter->SetCurveVisible (crvIdx, dlg.GetCurveVisible(crvIdx));
-			//psMgr.ChangeColumnVisibility(crvIdx, MeasurementPlotSettingsMgr::kColumnVisible[crvIdx] = dlg.GetColumnVisible(crvIdx));
+			m_Table->SetColumnVisible  (crvIdx, dlg.GetColumnVisible(crvIdx));
 		}
 		//MainWnd::kGraphBkgrColor = dlg.GetBackgroundColor();
 		//MainWnd::kGraphFrameColor = dlg.GetFrameColor();
@@ -86,7 +86,7 @@ void RecordingDisplayWnd::SetGraphOptions()
 		//	ChangeWindowStyle(kWindowStyle);
 
 		//m_Table->UpdateColumnVisibility();
-		//ResizeTable();
+		ResizeTable();
 
 		if (m_Plotter.get()) {
 			m_Plotter->AdjustScrMargins();

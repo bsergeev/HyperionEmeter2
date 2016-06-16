@@ -66,11 +66,10 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
             QGroupBox* columnGrpBox = new QGroupBox(tr("Columns"), this);
             QVBoxLayout* layColumnVisibility = new QVBoxLayout;
 
-                for (unsigned short i=0;  i < N_curves;  ++i)
+                for (unsigned short i=1;  i < N_curves;  ++i)
                 {
                     QCheckBox* chBx = new QCheckBox(recording.SeriesName(ColumnIdx(i)), this );
-                    chBx->setChecked(true); // <<< DEBUG TBD  psMgr.IsColumnVisible(i) );
-                    chBx->setVisible(i > 0);// && mayExist[i]);
+                               chBx->setChecked(table->IsColumnVisible(i));
                     m_ColumnVisibleChBxs[i] = chBx;
                   
                     layColumnVisibility->addWidget(chBx);

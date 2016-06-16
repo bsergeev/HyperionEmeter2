@@ -1,5 +1,6 @@
 #include "RecordingTableView.h"
 #include "RecordingDataModel.h"
+#include "Recording.h"
 
 #include <QScrollBar>
 #include <QHeaderView>
@@ -7,13 +8,18 @@
 RecordingTableView::RecordingTableView(const std::shared_ptr<RecordingDataModel>& model)
     : m_model(model)
 {
-      setModel(model.get());
-      setAttribute(Qt::WA_DeleteOnClose);
+	const Recording& recording = model->GetRecording();
+	const size_t N = recording.numColums();
+	m_columnVisible = std::vector<bool>(N, true);
+	
 
-      verticalHeader()->hide();
-      setAlternatingRowColors(true);
-      setStyleSheet("selection-background-color: lightblue");
-      setStyleSheet("QHeaderView::section { background-color:lightgray }");
+    setModel(model.get());
+    setAttribute(Qt::WA_DeleteOnClose);
+
+    verticalHeader()->hide();
+    setAlternatingRowColors(true);
+    setStyleSheet("selection-background-color: lightblue");
+    setStyleSheet("QHeaderView::section { background-color:lightgray }");
 }
 
 int RecordingTableView::GetTotalWidth() const
@@ -23,4 +29,25 @@ int RecordingTableView::GetTotalWidth() const
         w += columnWidth(column);
     }
     return w;
+}
+
+bool RecordingTableView::IsColumnVisible(size_t columnIdx) const
+{
+    bool visible = false;
+    if (columnIdx < m_columnVisible.size()) {
+        visible = m_columnVisible.at(columnIdx);
+    } else {
+        assert(!"Invalid curve index");
+    }
+    return visible;
+}
+
+void RecordingTableView::SetColumnVisible(size_t columnIdx, bool visible)
+{
+    if (columnIdx < m_columnVisible.size()) {
+		m_columnVisible.at(columnIdx) = visible;
+		setColumnHidden   (columnIdx,  !visible);
+    } else {
+        assert(!"Invalid curve index");
+    }
 }

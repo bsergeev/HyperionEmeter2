@@ -43,8 +43,8 @@ public:
 	bool IsCurveVisible (size_t curveIdx) const;
 	void SetCurveVisible(size_t curveIdx, bool visible);
 
-    void   AdjustScrMargins();
-    void   ComputeTicks(int minTickNumber = -1);
+    void AdjustScrMargins();
+    void ComputeTicks(int minTickNumber = -1);
 
     // Overrides for QAbstractItemView pure virtual functions . . . . . . . . .
     virtual void scrollTo(const QModelIndex&, ScrollHint = EnsureVisible) override {}
