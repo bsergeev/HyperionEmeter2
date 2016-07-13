@@ -63,6 +63,18 @@ MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     m_toolBar->addAction(m_actOpen);
     m_toolBar->addAction(m_actSave);
 
+	m_fileMenu = menuBar()->addMenu(tr("&File"));
+	m_fileMenu->addAction(m_actSave);
+	m_deviceMenu = menuBar()->addMenu(tr("&Device"));
+	m_deviceMenu->addAction(m_actDownload);
+	m_deviceMenu->addAction(m_actErase);
+	if (QAction* exitAct = new (std::nothrow) QAction(tr("E&xit"), this)) {
+		exitAct->setShortcuts(QKeySequence::Quit);
+		exitAct->setStatusTip(tr("Exit the application"));
+		connect(exitAct, &QAction::triggered, this, &QWidget::close);
+	}
+
+
     if (m_logWindow = new (std::nothrow) LogWindow(this)) {
         m_mdiArea->addSubWindow(m_logWindow);
     }

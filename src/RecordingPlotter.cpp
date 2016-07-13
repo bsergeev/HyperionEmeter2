@@ -1,16 +1,23 @@
 #include "RecordingPlotter.h"
+
+#include "DefaultValues.h"
 #include "Recording.h"
 #include "RecordingDataModel.h"
 
-#include <QPaintEvent>
-#include <QResizeEvent>
-#include <QPainter>
-#include <QTextStream>
-#include <QColor>
 #include <QAction>
+#include <QColor>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QResizeEvent>
+#include <QSettings>
+#include <QTextStream>
 #include <QToolTip>
 
 #include <sstream>
+
+// static
+DefaultValues RecordingPlotter::sCurveVisible{ true };
+
 //------------------------------------------------------------------------------
 
 RecordingPlotter::RecordingPlotter(const std::shared_ptr<RecordingDataModel>& model,
@@ -19,16 +26,25 @@ RecordingPlotter::RecordingPlotter(const std::shared_ptr<RecordingDataModel>& mo
     , m_model(model)
     , m_Font(QFont("Arial", 12))
 {
+    ReadSettings();
+
     ComputeTicks();
     m_margin[eLEFT] = m_margin[eRIGHT] = m_margin[eUP] = m_margin[eDOWN] = 5; // it'll be set in UpdateScrMargins
 
     const Recording& recording = model->GetRecording();
-    const size_t N = recording.numColums();
-    m_curveVisible = std::vector<bool>(N, true);
+    const size_t    numColumns = recording.numColums();
+
+    // Initialize curve visibility from the defaults, static sCurveVisible, but 
+    // only for existing columns.
+    m_curveVisible.resize(numColumns);
+    for (size_t ci = 0;  ci < numColumns;  ++ci) {
+        m_curveVisible.at(ci) = sCurveVisible.defaultInRecording(recording, ci);
+    }
 }
 //------------------------------------------------------------------------------
 RecordingPlotter::~RecordingPlotter()
 {
+    WriteSettings();
 }
 //------------------------------------------------------------------------------
 
@@ -210,13 +226,13 @@ QString RecordingPlotter::SecondsTxt(double sec)
 size_t RecordingPlotter::GetNRightAxes() const
 {
     const Recording& rec = m_model->GetRecording();
-	const size_t N_curves = rec.numColums();
-	size_t N_visible_curves = 1;
-	for (size_t i = 0; i < N_curves; ++i) {
-		if (m_curveVisible.at(i)) {
-			++N_visible_curves;
-		}
-	}
+    const size_t N_curves = rec.numColums();
+    size_t N_visible_curves = 1;
+    for (size_t i = 0; i < N_curves; ++i) {
+        if (m_curveVisible.at(i)) {
+            ++N_visible_curves;
+        }
+    }
     const size_t nAxes = 1 + (N_visible_curves > 3)? N_visible_curves-3 : 0;
     return nAxes;
 }
@@ -502,24 +518,24 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         // Next, process all other columns skipping 1st column, as it's X-axis
         for (size_t col = 1; col < N_curves; ++col) 
         {
-			if (m_curveVisible.at(col)) {
-				painter.setPen(QPen(QBrush(m_model->GetColumnColor(col), Qt::SolidPattern), 2, Qt::SolidLine));
-				const auto&  ticks = m_tickV.at(col);
-				const double firstY = ticks.front();
-				const double lastY = ticks.back();
+            if (m_curveVisible.at(col)) {
+                painter.setPen(QPen(QBrush(m_model->GetColumnColor(col), Qt::SolidPattern), 2, Qt::SolidLine));
+                const auto&  ticks = m_tickV.at(col);
+                const double firstY = ticks.front();
+                const double lastY = ticks.back();
 
-				const ColumnIdx colIdx = ColumnIdx{ col };
-				int prevY = 0;
-				for (size_t row = 0; row < N_points; ++row)
-				{
-					const double y = recording.GetValue(row, colIdx);
-					const int scrY = ComputeScrCoord(y, firstY, lastY, false); // vertical
-					if (row > 0) {
-						painter.drawLine(scrX[row - 1], prevY, scrX[row], scrY);
-					}
-					prevY = scrY;
-				}
-			}
+                const ColumnIdx colIdx = ColumnIdx{ col };
+                int prevY = 0;
+                for (size_t row = 0; row < N_points; ++row)
+                {
+                    const double y = recording.GetValue(row, colIdx);
+                    const int scrY = ComputeScrCoord(y, firstY, lastY, false); // vertical
+                    if (row > 0) {
+                        painter.drawLine(scrX[row - 1], prevY, scrX[row], scrY);
+                    }
+                    prevY = scrY;
+                }
+            }
         }
     }
 }
@@ -539,7 +555,36 @@ void RecordingPlotter::SetCurveVisible(size_t curveIdx, bool visible)
 {
     if (curveIdx < m_curveVisible.size()) {
         m_curveVisible.at(curveIdx) = visible;
+        sCurveVisible.setDefaultInRecording(m_model->GetRecording(), curveIdx, visible);
     } else {
         assert(!"Invalid curve index");
     }
+}
+
+//static
+void RecordingPlotter::ReadSettings()
+{
+    static bool alreadyLoaded = false;
+    if (!alreadyLoaded)
+    {
+        QSettings settings;
+        const int size = settings.beginReadArray("curvesVisible");
+        for (int i = 0; i < size; ++i) {
+            settings.setArrayIndex(i);
+            sCurveVisible.at(i) = settings.value("visible").toBool();
+        }
+        settings.endArray();
+    }
+}
+
+//static
+void RecordingPlotter::WriteSettings()
+{
+    QSettings settings;
+    settings.beginWriteArray("curvesVisible", SamplePoint::eNUM_VALUES);
+    for (int i = 0;  i < SamplePoint::eNUM_VALUES;  ++i) {
+        settings.setArrayIndex(i);
+        settings.setValue("visible", sCurveVisible.at(i));
+    }
+    settings.endArray();
 }

@@ -52,7 +52,9 @@ private:
     std::unique_ptr<HypReader> m_reader;
 
     QMdiArea* m_mdiArea = nullptr;
-    QToolBar* m_toolBar = nullptr;
+	QMenu*    m_fileMenu = nullptr;
+	QMenu*    m_deviceMenu = nullptr;
+    QToolBar* m_toolBar  = nullptr;
     QAction*  m_actDownload = nullptr;
     QAction*  m_actErase = nullptr;
     QAction*  m_actOpen  = nullptr;

@@ -119,6 +119,9 @@
     <ClCompile Include="src\CustomWidgets\ColorButton.cpp">
       <Filter>Source Files\CustomWidgets</Filter>
     </ClCompile>
+    <ClCompile Include="src\DefaultValues.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\ComUtils.h">
@@ -137,6 +140,9 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="src\LogWindow.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="src\RecordingDisplayOptionsDlg.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -165,11 +171,11 @@
     <ClInclude Include="src\TypeWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\RecordingDisplayOptionsDlg.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\CustomWidgets\ColorButton.h">
       <Filter>Header Files\CustomWidgets</Filter>
+    </ClInclude>
+    <ClInclude Include="src\DefaultValues.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

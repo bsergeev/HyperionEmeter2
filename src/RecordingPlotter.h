@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SamplePoint.h"
+
 #include <QAbstractItemView>
 #include <QWidget>
 #include <QImage>
@@ -12,11 +14,13 @@
 #include <memory>
 #include <vector>
 
-class QString;
-class QResizeEvent;
-class QPaintEvent;
 class QColor;
+class QPaintEvent;
+class QResizeEvent;
+class QString;
 
+class DefaultValues;
+class Recording;
 class RecordingDataModel;
 
 //------------------------------------------------------------------------------
@@ -40,8 +44,8 @@ public:
     QSize minimumSizeHint() const { return QSize(600, 400); }
     QSize sizeHint       () const { return QSize(700, 500); }
 
-	bool IsCurveVisible (size_t curveIdx) const;
-	void SetCurveVisible(size_t curveIdx, bool visible);
+    bool IsCurveVisible (size_t curveIdx) const;
+    void SetCurveVisible(size_t curveIdx, bool visible);
 
     void AdjustScrMargins();
     void ComputeTicks(int minTickNumber = -1);
@@ -88,6 +92,12 @@ private:
 
 public: // statics
     static QString SecondsTxt(double sec);
+
+private: // static
+    static void ReadSettings();
+    static void WriteSettings();
+
+    static DefaultValues sCurveVisible;
 };
 
 //------------------------------------------------------------------------------
