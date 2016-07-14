@@ -120,8 +120,9 @@ bool HypReader::SaveToFile(const QString& filePath)
         std::ofstream file(filePath.toStdString(), std::ios_base::out);
         if ((ok = (file.good() && file.is_open())) == true) {
             for (auto& recording : m_recordings) {
-                recording.PrintHeader(file);
-                recording.PrintData  (file);
+                recording.PrintHeader     (file);
+                recording.PrintColumnNames(file);
+                recording.PrintData       (file);
                 file << std::endl;
             }
             ok = !file.fail();

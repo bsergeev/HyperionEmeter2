@@ -17,7 +17,7 @@ Recording::Recording(std::vector<SamplePoint>&& points)
     }
 }
 //------------------------------------------------------------------------------
-// return whether anything was changed
+// Return whether anything was changed
 bool Recording::MassageData()
 {
     const size_t N_points = m_points.size();
@@ -152,15 +152,26 @@ void Recording::PrintHeader(std::ostream& os, bool skipEmpty) const
         bool first = true;
         for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
             if (!m_hasData[i]) {
-                os << ((first)? "Constant values: ":"; ") << SamplePoint::SeriesName(i) << " = " 
-                   << std::fixed<<std::setprecision(SamplePoint::sSeriesPrecision[i]) << pt0[i];
-                first = false;
+                const double v = pt0[i];
+                const bool doPrint = ((i == SamplePoint::eRPM      ||
+                                       i == SamplePoint::eTempAmb  ||
+                                       i == SamplePoint::eThrottle ||
+                                       i == SamplePoint::emAh_In ) && v > 0.0)
+                                   || (SamplePoint::eTemp1 <= i && i <= SamplePoint::eTemp3 && v != 0.0)
+                                   || (i >= SamplePoint::ePowerOut && v > 0.0);
+                if (doPrint) {
+                    os << ((first) ? "Constant values: " : "; ") << SamplePoint::SeriesName(i) << " = "
+                       << std::fixed << std::setprecision(SamplePoint::sSeriesPrecision[i]) << pt0[i];
+                    first = false;
+                }
             }
         }
         os << std::endl;
     }
-
-    // Next, columns with varying data
+}
+//------------------------------------------------------------------------------
+void Recording::PrintColumnNames(std::ostream& os, bool skipEmpty) const
+{
     os << SamplePoint::SeriesName(0); // seconds are always present
     for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
         if (!skipEmpty || m_hasData[i]) {

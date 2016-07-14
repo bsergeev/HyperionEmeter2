@@ -36,9 +36,9 @@ public:
     QColor GetBackgroundColor() const;
     QColor GetFrameColor     () const;
     QColor GetGridlineColor  () const;
-    QColor GetCurveColor (int curveIdx) const;
-    bool GetCurveVisible (int curveIdx) const;
-    bool GetColumnVisible(int curveIdx) const;
+    QColor GetCurveColor (size_t curveIdx) const;
+    bool GetCurveVisible (size_t curveIdx) const;
+    bool GetColumnVisible(size_t curveIdx) const;
     bool GetShowTitle()      const { return (m_VisibleTitle)?      m_VisibleTitle->     isChecked() : false; }
     bool GetShowSubTitle()   const { return (m_VisibleSubTitle)?   m_VisibleSubTitle->  isChecked() : false; }
     bool GetShowLegend()     const { return (m_LegendChkBx )?      m_LegendChkBx->      isChecked() : false; }
@@ -64,12 +64,12 @@ private:
     QCheckBox*    m_VisibleSubTitle  = nullptr;
 
     QGroupBox*    m_TableGrpBox      = nullptr;
-    QVector<QCheckBox*> m_ColumnVisibleChBxs;
+    std::vector<QCheckBox*>   m_ColumnVisibleChBxs;
     QCheckBox*    m_ColorColumns     = nullptr;
 
     QGroupBox*    m_PlotGrpBox       = nullptr;
-    QVector<ColorButton*> m_ColorBtns;
-    QVector<QCheckBox*> m_CurveVisibleChBxs;
+    std::vector<ColorButton*> m_ColorBtns;
+    std::vector<QCheckBox*>   m_CurveVisibleChBxs;
     QCheckBox*    m_LegendChkBx      = nullptr;
     QCheckBox*    m_ShowTooltip      = nullptr;
     QGroupBox*    m_XAxisTypeGrpBox  = nullptr;

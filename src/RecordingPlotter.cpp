@@ -266,7 +266,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         // Title [& sub-title] . . . . . . . . . . . . . . . . . . . . . . . . . . . 
         const QString plotDescription = "Downloaded from RDU/MDU";
         std::stringstream ss;
-        recording.PrintHeader(ss);
+        recording.PrintHeader(ss); // <<< DEBUG TBD: check if header is empty
         const QString plotStats = QString::fromStdString(ss.str());
         bool title_shown = false;
         if ((title_shown = (m_showTitle && !plotDescription.isEmpty())) == true)
@@ -565,26 +565,14 @@ void RecordingPlotter::SetCurveVisible(size_t curveIdx, bool visible)
 void RecordingPlotter::ReadSettings()
 {
     static bool alreadyLoaded = false;
-    if (!alreadyLoaded)
-    {
-        QSettings settings;
-        const int size = settings.beginReadArray("curvesVisible");
-        for (int i = 0; i < size; ++i) {
-            settings.setArrayIndex(i);
-            sCurveVisible.at(i) = settings.value("visible").toBool();
-        }
-        settings.endArray();
+    if (!alreadyLoaded) {
+        sCurveVisible.loadSettings("curvesVisible");
+        alreadyLoaded = true;
     }
 }
 
 //static
 void RecordingPlotter::WriteSettings()
 {
-    QSettings settings;
-    settings.beginWriteArray("curvesVisible", SamplePoint::eNUM_VALUES);
-    for (int i = 0;  i < SamplePoint::eNUM_VALUES;  ++i) {
-        settings.setArrayIndex(i);
-        settings.setValue("visible", sCurveVisible.at(i));
-    }
-    settings.endArray();
+    sCurveVisible.saveSettings("curvesVisible");
 }

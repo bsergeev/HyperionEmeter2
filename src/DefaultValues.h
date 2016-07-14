@@ -4,6 +4,7 @@
 
 #include <array>
 
+class QString;
 class Recording;
 
 class DefaultValues
@@ -17,6 +18,9 @@ public:
 
     bool    defaultInRecording(const Recording& rec, size_t colIdx);
     void setDefaultInRecording(const Recording& rec, size_t colIdx, bool v);
+
+    void saveSettings(const QString& name);
+    void loadSettings(const QString& name);
 
 private:
     std::array<bool, SamplePoint::eNUM_VALUES> m_vals; // indexed by SamplePoint::ValueIndex, i.e. for all curves/columns

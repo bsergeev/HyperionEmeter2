@@ -20,7 +20,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
                                                       , const RecordingDataModel*   dataModel // IPlotSettingsMgr const& psMgr
                                                       , const RecordingPlotter*     plotter
                                                       , const RecordingTableView*   table
-                                                      , int  xAxisType
+                                                      , int  // xAxisType
                                                       , bool imperialUnits
                                                       , bool visibleTitle
                                                       , bool visibleSubTitle
@@ -66,7 +66,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
             QGroupBox* columnGrpBox = new QGroupBox(tr("Columns"), this);
             QVBoxLayout* layColumnVisibility = new QVBoxLayout;
 
-                for (unsigned short i=1;  i < N_curves;  ++i)
+                for (size_t i=1;  i < N_curves;  ++i)
                 {
                     QCheckBox* chBx = new QCheckBox(recording.SeriesName(ColumnIdx(i)), this );
                                chBx->setChecked(table->IsColumnVisible(i));
@@ -104,13 +104,14 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
                     const bool visible = true; // <<< DEBUG TBD  !psMgr.isXAxis(i) && mayExist[i];
                     ColorButton* btn  = new ColorButton( dataModel->GetColumnColor(i), this );
                     btn->setVisible(visible);
-                    grLay->addWidget(m_ColorBtns[i] = btn, i, 0);
+                    m_ColorBtns.at(i) = btn;
+                    grLay->addWidget(btn, static_cast<int>(i), 0);
 
                     QCheckBox* chBx = new QCheckBox(recording.SeriesName(ColumnIdx(i)), this );
                                chBx->setChecked(plotter->IsCurveVisible(i) );
                                chBx->setVisible(visible);
-                    m_CurveVisibleChBxs[i] = chBx;
-                    grLay->addWidget(chBx, i, 1, Qt::AlignLeft);
+                    m_CurveVisibleChBxs.at(i) = chBx;
+                    grLay->addWidget(chBx, static_cast<int>(i), 1, Qt::AlignLeft);
                 }
 
             curveGrpBox->setLayout(grLay);
@@ -253,7 +254,7 @@ void RecordingDisplayOptionsDlg::ShowCrvGroup(int crvIdx, bool show, bool* check
             }
             chBx->setVisible(show);
         }
-        if (ColorButton* cBtn = m_ColorBtns[crvIdx]) {
+        if (ColorButton* cBtn = m_ColorBtns.at(crvIdx)) {
             cBtn->setVisible(show);
         }
     }
@@ -315,7 +316,7 @@ void RecordingDisplayOptionsDlg::ToggledImperialUnits(bool checked)
 
 //------------------------------------------------------------------------------
 
-QColor RecordingDisplayOptionsDlg::GetCurveColor( int curveIdx ) const
+QColor RecordingDisplayOptionsDlg::GetCurveColor(size_t curveIdx) const
 {
     if (0 <= curveIdx  &&  curveIdx < m_ColorBtns.size()
      && m_ColorBtns[curveIdx] != nullptr) {
@@ -353,7 +354,7 @@ QColor RecordingDisplayOptionsDlg::GetGridlineColor() const
 
 //------------------------------------------------------------------------------
 
-bool RecordingDisplayOptionsDlg::GetCurveVisible(int curveIdx) const
+bool RecordingDisplayOptionsDlg::GetCurveVisible(size_t curveIdx) const
 {
     if (0 <= curveIdx  &&  curveIdx < m_CurveVisibleChBxs.size()
      && m_CurveVisibleChBxs[curveIdx] != nullptr) {
@@ -364,7 +365,7 @@ bool RecordingDisplayOptionsDlg::GetCurveVisible(int curveIdx) const
 
 //------------------------------------------------------------------------------
 
-bool RecordingDisplayOptionsDlg::GetColumnVisible(int curveIdx) const
+bool RecordingDisplayOptionsDlg::GetColumnVisible(size_t curveIdx) const
 {
     if (0 <= curveIdx  &&  curveIdx < m_ColumnVisibleChBxs.size()
      && m_ColumnVisibleChBxs[curveIdx] != nullptr)

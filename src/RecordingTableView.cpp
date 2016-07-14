@@ -6,7 +6,6 @@
 
 #include <QHeaderView>
 #include <QScrollBar>
-#include <QSettings>
 
 // static
 DefaultValues RecordingTableView::sColumnVisible{ true };
@@ -68,7 +67,7 @@ void RecordingTableView::SetColumnVisible(size_t columnIdx, bool visible)
 {
     if (columnIdx < m_columnVisible.size()) {
 		m_columnVisible.at(columnIdx) = visible;
-		setColumnHidden   (columnIdx,  !visible);
+		setColumnHidden(static_cast<int>(columnIdx),  !visible);
         sColumnVisible.setDefaultInRecording(m_model->GetRecording(), columnIdx, visible);
     } else {
         assert(!"Invalid curve index");
@@ -80,7 +79,7 @@ void RecordingTableView::UpdateColumnVisibility()
     const Recording& recording = m_model->GetRecording();
     const size_t  numColumns = recording.numColums();
     for (size_t columnIdx = 1; columnIdx < numColumns; ++columnIdx) {
-        setColumnHidden(columnIdx, !sColumnVisible.defaultInRecording(recording, columnIdx));
+        setColumnHidden(static_cast<int>(columnIdx), !sColumnVisible.defaultInRecording(recording, columnIdx));
     }
 }
 
@@ -88,26 +87,14 @@ void RecordingTableView::UpdateColumnVisibility()
 void RecordingTableView::ReadSettings()
 {
     static bool alreadyLoaded = false;
-    if (!alreadyLoaded)
-    {
-        QSettings settings;
-        const int size = settings.beginReadArray("columnsVisible");
-        for (int i = 0; i < size; ++i) {
-            settings.setArrayIndex(i);
-            sColumnVisible.at(i) = settings.value("visible").toBool();
-        }
-        settings.endArray();
+    if (!alreadyLoaded) {
+        sColumnVisible.loadSettings("columnsVisible");
+        alreadyLoaded = true;
     }
 }
 
 //static
 void RecordingTableView::WriteSettings()
 {
-    QSettings settings;
-    settings.beginWriteArray("columnsVisible", SamplePoint::eNUM_VALUES);
-    for (int i = 0; i < SamplePoint::eNUM_VALUES; ++i) {
-        settings.setArrayIndex(i);
-        settings.setValue("visible", sColumnVisible.at(i));
-    }
-    settings.endArray();
+    sColumnVisible.saveSettings("columnsVisible");
 }

@@ -26,8 +26,9 @@ public:
     void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
 
 
-    void PrintHeader(std::ostream& os, bool skipEmpty = true) const;
-    void PrintData  (std::ostream& os, bool skipEmpty = true) const;
+    void PrintHeader     (std::ostream& os, bool skipEmpty = true) const;
+    void PrintColumnNames(std::ostream& os, bool skipEmpty = true) const;
+    void PrintData       (std::ostream& os, bool skipEmpty = true) const;
 
     size_t size()      const { return m_points.size(); }
     size_t numColums() const { return m_numHasData;    }
