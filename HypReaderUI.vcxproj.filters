@@ -119,9 +119,6 @@
     <ClCompile Include="src\CustomWidgets\ColorButton.cpp">
       <Filter>Source Files\CustomWidgets</Filter>
     </ClCompile>
-    <ClCompile Include="src\DefaultValues.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="src\ComUtils.h">

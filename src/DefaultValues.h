@@ -1,27 +1,81 @@
 #pragma once
 
+#include "Recording.h"
 #include "SamplePoint.h"
 
 #include <array>
 
-class QString;
-class Recording;
+#include <QSettings>
+#include <QString>
 
-class DefaultValues
+
+template <typename T, typename TReader,
+          size_t   N,
+          typename std::enable_if<std::is_literal_type<T>::value>::type * = nullptr>
+class DefaultValues_t
 {
 public:
-             DefaultValues()       noexcept = default;
-    explicit DefaultValues(bool v) noexcept { m_vals.fill(v); }
+             DefaultValues_t()       noexcept = default;
+    explicit DefaultValues_t(bool v) noexcept { m_vals.fill(v); }
 
-    bool  at(size_t idx) const { return m_vals.at(idx); }
-    bool& at(size_t idx)       { return m_vals.at(idx); }
+    T  at(size_t idx) const { return m_vals.at(idx); }
+    T& at(size_t idx)       { return m_vals.at(idx); }
 
-    bool    defaultInRecording(const Recording& rec, size_t colIdx);
-    void setDefaultInRecording(const Recording& rec, size_t colIdx, bool v);
+    T defaultInRecording(const Recording& rec, size_t colIdx) {
+        const SamplePoint::ValueIndex vi = rec.GetColumnType(ColumnIdx{ colIdx });
+        if (vi < N) {
+            return m_vals.at(vi);
+        } else {
+            assert(!"Invalid value index");
+            return static_cast<T>(0);
+        }
+    }
 
-    void saveSettings(const QString& name);
-    void loadSettings(const QString& name);
+    void setDefaultInRecording(const Recording& rec, size_t colIdx, T v) {
+        const SamplePoint::ValueIndex vi = rec.GetColumnType(ColumnIdx{ colIdx });
+        if (vi < N) {
+            m_vals.at(vi) = v;
+        } else {
+            assert(!"Invalid value index");
+        }
+    }
 
-private:
-    std::array<bool, SamplePoint::eNUM_VALUES> m_vals; // indexed by SamplePoint::ValueIndex, i.e. for all curves/columns
+    void saveSettings(const QString& name) {
+        QSettings settings;
+        settings.beginWriteArray(name, N);
+        for (int i = 0; i < N; ++i) {
+            settings.setArrayIndex(i);
+            settings.setValue("visible", m_vals.at(i));
+        }
+        settings.endArray();
+    }
+
+    void loadSettings(const QString& name) {
+        QSettings settings;
+        const int size = settings.beginReadArray(name);
+        if (TReader* const reader = static_cast<TReader*>(this)) {
+            for (int i = 0; i < size; ++i) {
+                settings.setArrayIndex(i);
+                m_vals.at(i) = reader->loadSetting(settings, "visible");
+            }
+        }
+        settings.endArray();
+    }
+
+protected:
+    std::array<T, N> m_vals; // indexed by SamplePoint::ValueIndex, i.e. for all curves/columns
+}; // class DefaultValues_t
+
+
+// bool "specialization" of DefaultValues_t
+template <size_t N>
+class DefaultBools_t : public DefaultValues_t<bool, DefaultBools_t<N>, N>
+{
+public:
+    DefaultBools_t(bool v)  noexcept { m_vals.fill(v); }
+
+    bool loadSetting(QSettings& settings, const QString& name) {
+        return settings.value(name).toBool();
+    }
 };
+typedef DefaultBools_t<SamplePoint::eNUM_VALUES> DefaultBools;

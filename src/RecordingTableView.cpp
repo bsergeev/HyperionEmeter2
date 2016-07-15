@@ -8,7 +8,7 @@
 #include <QScrollBar>
 
 // static
-DefaultValues RecordingTableView::sColumnVisible{ true };
+DefaultBools RecordingTableView::sColumnVisible{ true };
 
 //------------------------------------------------------------------------------
 RecordingTableView::RecordingTableView(const std::shared_ptr<RecordingDataModel>& model)

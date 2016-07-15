@@ -16,7 +16,7 @@
 #include <sstream>
 
 // static
-DefaultValues RecordingPlotter::sCurveVisible{ true };
+DefaultBools RecordingPlotter::sCurveVisible{ true };
 
 //------------------------------------------------------------------------------
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DefaultValues.h"
 #include "SamplePoint.h"
 
 #include <QAbstractItemView>
@@ -19,7 +20,6 @@ class QPaintEvent;
 class QResizeEvent;
 class QString;
 
-class DefaultValues;
 class Recording;
 class RecordingDataModel;
 
@@ -97,7 +97,7 @@ private: // static
     static void ReadSettings();
     static void WriteSettings();
 
-    static DefaultValues sCurveVisible;
+    static DefaultBools sCurveVisible;
 };
 
 //------------------------------------------------------------------------------

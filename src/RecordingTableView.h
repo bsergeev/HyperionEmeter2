@@ -1,10 +1,12 @@
 #pragma once
 
+#include "DefaultValues.h"
+
 #include <QTableView>
+
 #include <memory>
 #include <vector>
 
-class DefaultValues;
 class RecordingDataModel;
 
 class RecordingTableView : public QTableView {
@@ -27,5 +29,5 @@ private: // static
     static void ReadSettings();
     static void WriteSettings();
 
-    static DefaultValues sColumnVisible;
+    static DefaultBools sColumnVisible;
 };
