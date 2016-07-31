@@ -22,12 +22,12 @@ public:
     };
 
     explicit RecordingDisplayWnd(std::shared_ptr<RecordingDataModel> dataModel,
-                                 std::unique_ptr<RecordingTableView> table,
-                                 std::unique_ptr<RecordingPlotter>   plotter,
                                  QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
     QSize minimumSizeHint() const { return QSize( 800, 500); }
     QSize sizeHint()        const { return QSize(1000, 600); }
+    
+    QAction* GetGraphOptionsAction() const { return m_graphOptions_Actn; }
 
 protected:
     virtual void resizeEvent     (QResizeEvent*      evt) override;

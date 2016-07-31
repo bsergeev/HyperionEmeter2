@@ -3,8 +3,9 @@
 #include "HypReader.h"
 #include "Recording.h"
 
-RecordingDataModel::RecordingDataModel(const Recording& rec)
-    : m_recording(rec)
+RecordingDataModel::RecordingDataModel(const Recording& rec, QObject* parent)
+    : QAbstractTableModel(parent)
+    , m_recording(rec)
 {
     m_curveColor = {
         Qt::black,
@@ -30,7 +31,7 @@ QColor RecordingDataModel::GetColumnColor(size_t columnIndex) const
 
 void RecordingDataModel::SetColumnColor(size_t columnIndex, const QColor& clr)
 {
-	m_curveColor.at(columnIndex % N_COLORS) = clr;
+    m_curveColor.at(columnIndex % N_COLORS) = clr;
 }
 //------------------------------------------------------------------------------
 int RecordingDataModel::rowCount(const QModelIndex&) const

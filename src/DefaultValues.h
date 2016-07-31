@@ -72,7 +72,7 @@ template <size_t N>
 class DefaultBools_t : public DefaultValues_t<bool, DefaultBools_t<N>, N>
 {
 public:
-    DefaultBools_t(bool v)  noexcept { m_vals.fill(v); }
+    DefaultBools_t(bool v) noexcept : DefaultValues_t(v) {}
 
     bool loadSetting(QSettings& settings, const QString& name) {
         return settings.value(name).toBool();

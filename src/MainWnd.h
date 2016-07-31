@@ -34,8 +34,9 @@ private:
     void EraseDevice ();
     void LoadFromFile();
     void SaveToFile  ();
-
-    void updateMenus();
+    void updateMenus ();
+    void readSettings();
+    void writeSettings();
 
     void DisplayMessageFromReader(const QString& msg);
     void FinishDownload(size_t numRecsDownloaded);
@@ -45,22 +46,20 @@ private:
     void DisplayMessage(const QString& msg);
     void DownloadFinished(size_t numRecsDownloaded);
 
-    void ReadSettings();
-    void WriteSettings();
-
 //data:
     std::unique_ptr<HypReader> m_reader;
 
-    QMdiArea* m_mdiArea = nullptr;
-	QMenu*    m_fileMenu = nullptr;
-	QMenu*    m_deviceMenu = nullptr;
-    QToolBar* m_toolBar  = nullptr;
+    QMdiArea* m_mdiArea     = nullptr;
+    QMenu*    m_fileMenu    = nullptr;
+    QMenu*    m_deviceMenu  = nullptr;
+    QMenu*    m_windowMenu  = nullptr;
+    QToolBar* m_toolBar     = nullptr;
     QAction*  m_actDownload = nullptr;
-    QAction*  m_actErase = nullptr;
-    QAction*  m_actOpen  = nullptr;
-    QAction*  m_actSave  = nullptr;
+    QAction*  m_actErase    = nullptr;
+    QAction*  m_actOpen     = nullptr;
+    QAction*  m_actSave     = nullptr;
 
-    LogWindow* m_logWindow;
+    LogWindow* m_logWindow  = nullptr;
 
 //static:
     static bool  kAskForConfgirmation;

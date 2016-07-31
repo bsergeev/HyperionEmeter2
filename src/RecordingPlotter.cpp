@@ -6,13 +6,16 @@
 
 #include <QAction>
 #include <QColor>
+#include <QtDebug>
 #include <QPaintEvent>
 #include <QPainter>
 #include <QResizeEvent>
 #include <QSettings>
+#include <QStringRef>
 #include <QTextStream>
 #include <QToolTip>
 
+#include <iostream> // <<< DEBUG
 #include <sstream>
 
 // static
@@ -25,8 +28,16 @@ RecordingPlotter::RecordingPlotter(const std::shared_ptr<RecordingDataModel>& mo
     : QAbstractItemView(parent)
     , m_model(model)
     , m_Font(QFont("Arial", 12))
+    , m_RubberBand(QRubberBand::Rectangle, this)
 {
     ReadSettings();
+
+    setModel(model.get());
+    setSelectionMode(ExtendedSelection);
+    setSelectionBehavior(SelectItems);
+
+    setBackgroundRole(QPalette::Light);
+    setAutoFillBackground(true);
 
     ComputeTicks();
     m_margin[eLEFT] = m_margin[eRIGHT] = m_margin[eUP] = m_margin[eDOWN] = 5; // it'll be set in UpdateScrMargins
@@ -516,22 +527,34 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         }
 
         // Next, process all other columns skipping 1st column, as it's X-axis
+        QItemSelectionModel* selections = selectionModel();
         for (size_t col = 1; col < N_curves; ++col) 
         {
             if (m_curveVisible.at(col)) {
                 painter.setPen(QPen(QBrush(m_model->GetColumnColor(col), Qt::SolidPattern), 2, Qt::SolidLine));
                 const auto&  ticks = m_tickV.at(col);
                 const double firstY = ticks.front();
-                const double lastY = ticks.back();
+                const double lastY  = ticks.back();
 
                 const ColumnIdx colIdx = ColumnIdx{ col };
                 int prevY = 0;
                 for (size_t row = 0; row < N_points; ++row)
                 {
                     const double y = recording.GetValue(row, colIdx);
-                    const int scrY = ComputeScrCoord(y, firstY, lastY, false); // vertical
+                    const int scrY = ComputeScrCoord(y, firstY, lastY); // vertical
                     if (row > 0) {
                         painter.drawLine(scrX[row - 1], prevY, scrX[row], scrY);
+                    }
+
+                    // Draw selection markers
+                    if (selections->isSelected(model->index(row,   0, rootIndex()))
+                     || selections->isSelected(model->index(row, col, rootIndex())))
+                    {
+                        int const D = 6; // <<< DEBUG
+                        painter.drawLine(scrX[row] - D, scrY, scrX[row], scrY - D);
+                        painter.drawLine(scrX[row], scrY - D, scrX[row] + D, scrY);
+                        painter.drawLine(scrX[row] + D, scrY, scrX[row], scrY + D);
+                        painter.drawLine(scrX[row], scrY + D, scrX[row] - D, scrY);
                     }
                     prevY = scrY;
                 }
@@ -539,6 +562,120 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         }
     }
 }
+
+void RecordingPlotter::mouseMoveEvent(QMouseEvent* event)
+{
+    bool done = false;
+
+    if (event->buttons() & Qt::LeftButton)
+    {
+        if (RecordingDataModel* const model = m_model.get())
+        {
+            int xp = event->pos().x() + 1;
+            if (xp < m_margin[eLEFT] || xp > width() - m_margin[eRIGHT]) {
+                m_RubberBand.hide();
+                return;
+            }
+
+            const Recording& recording = model->GetRecording();
+            const size_t N_points = recording.size();
+            const size_t N_curves = recording.numColums();
+            const ColumnIdx ci0 = ColumnIdx{ 0 };
+
+
+            QRect rubberBandRect(xp, m_margin[eUP] + 1, 1, height() - m_margin[eUP] - m_margin[eDOWN]);
+            m_RubberBand.setGeometry(rubberBandRect);
+            m_RubberBand.show();
+
+            // First, find where xp falls
+            const auto ticksSec = m_tickV.at(0);
+            const double firstSec = ticksSec.front();
+            const double lastSec  = ticksSec.back();
+            for (size_t row = 0; row < N_points; ++row) 
+            {
+                const double xV = recording.GetValue(row, ci0);
+                int x = ComputeScrCoord(xV, firstSec, lastSec, true); // horizontal
+                if (x >= xp) // for the first time
+                {
+                    assert(xp == x || row > 0);
+
+                    // Add stuff to selection
+                    QItemSelection selection;
+                    const size_t N_add_to_selection = (x == xp && row > 0)? 1 : 2;
+                    for (size_t i = 0; i < N_add_to_selection; ++i) {
+                        for (size_t col = 1; col < N_curves; ++col) {
+                            if (m_curveVisible.at(col)) {
+                                QModelIndex index = model->index(row - i, col);
+                                selection.append(QItemSelectionRange(index, index));
+                            }
+                        }
+                        QModelIndex index = model->index(row - i, 0);
+                        selection.append(QItemSelectionRange(index, index));
+                    }
+                    selectionModel()->select(selection, QItemSelectionModel::SelectCurrent);
+                    selectionModel()->setCurrentIndex(selection.back().bottomRight(), QItemSelectionModel::Current);
+
+                    double seconds = xV;
+                    double between = 0.0;
+                    if (x > xp)
+                    {
+                        assert(row > 0);
+                        const double prev_xV = recording.GetValue(row - 1, ci0);
+                        between = (row == 0) ? 0.0 // should never happen, but just in case
+                            : 1.0 - double(x - xp) / (x - ComputeScrCoord(prev_xV, firstSec, lastSec, true)); // horizontal
+                        assert(0.0 <= between && between < 1.0);
+                        seconds = prev_xV + between*(xV - prev_xV);
+                    }
+
+                    QString info = "<b>"+ QString::number(seconds, 'f', 2) + " Sec</b>";
+                    for (size_t col = 1; col < N_curves; ++col) {
+                        if (m_curveVisible.at(col)) 
+                        {
+                            const auto& colIdx = ColumnIdx{ col };
+
+                            double y = recording.GetValue(row, colIdx);
+                            if (between > 0.0 && row > 0) {
+                                const double prev_y = recording.GetValue(row-1, colIdx);
+                                y = prev_y + between*(y - prev_y);
+                            }
+                            const QString yStr = QString::number(y, 'f', static_cast<int>(recording.SeriesPrecision(colIdx)));
+
+                            info += "<br>";
+                            QString title(recording.SeriesName(colIdx));
+                            QStringRef unit;
+                            int commaPos = title.indexOf(", ");
+                            if (commaPos != -1) {
+                                unit = QStringRef(&title, commaPos + 2, title.length()-commaPos-2);
+                                info += QStringRef(&title, 0, commaPos).toString() +": "+ yStr +" "+ unit.toString();
+                            } else {
+                                info += title +": " + yStr;
+                            }
+                        }
+                    }
+                    QPoint p = event->globalPos();
+                    QToolTip::showText(QPoint(p.x(), p.y()+10), info);
+
+                    break;
+                }
+            } // end of " for (size_t row = 0; row < N_points && !done; ++row) " loop
+        }
+    }
+
+    if (done) {
+        update();
+    } else {
+        QWidget::mouseMoveEvent(event);
+    }
+}
+
+//------------------------------------------------------------------------------
+
+void RecordingPlotter::mouseReleaseEvent(QMouseEvent *event)
+{
+    m_RubberBand.hide();
+}
+
+//------------------------------------------------------------------------------
 
 bool RecordingPlotter::IsCurveVisible(size_t curveIdx) const
 {

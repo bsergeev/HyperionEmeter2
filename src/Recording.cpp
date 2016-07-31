@@ -72,6 +72,9 @@ bool Recording::MassageData()
                         for (size_t j = prev_sec_idx; j < i; ++j) {
                             m_points[j][SamplePoint::eSeconds] = s0 + ds*(j - prev_sec_idx);
                         }
+                    } else if (prev_sec_idx == 0) {
+                        changed = true;
+                        m_points[0][SamplePoint::eSeconds] = std::max(seconds - ds, 0.0);
                     }
                     prev_seconds = seconds;
                     prev_sec_idx = i;
@@ -131,7 +134,7 @@ bool Recording::MassageData()
         }
         assert(minV <= maxV);
         CurveInfo& ci = m_curveInfo[j];
-        ci.minV = minV;
+        ci.minV = std::min(0.0, minV); // <<< DEBUG TBD: make it an option
         ci.maxV = maxV;
     }
 

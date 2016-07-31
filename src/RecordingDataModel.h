@@ -11,7 +11,7 @@ class Recording;
 class RecordingDataModel : public QAbstractTableModel
 {
 public:
-    explicit RecordingDataModel(const Recording& rec);
+    explicit RecordingDataModel(const Recording& rec, QObject* parent = nullptr);
 
     virtual int      rowCount   (const QModelIndex& parent = QModelIndex()) const override;
     virtual int      columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -22,8 +22,8 @@ public:
     QString GetRecordingTitle()     const { return "Title"; }
     QString GetRecordingSubTitle()  const { return "Subtitle"; }
 
-	QColor GetColumnColor(size_t columnIndex) const;
-	void   SetColumnColor(size_t columnIndex, const QColor& clr);
+    QColor GetColumnColor(size_t columnIndex) const;
+    void   SetColumnColor(size_t columnIndex, const QColor& clr);
 
 private:
     const Recording& m_recording;

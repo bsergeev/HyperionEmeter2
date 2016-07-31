@@ -65,17 +65,17 @@ public:
 
 protected:
     void paintEvent       (QPaintEvent*  evt) override;
+    void mouseMoveEvent   (QMouseEvent*  evt) override;
+    void mouseReleaseEvent(QMouseEvent*  evt) override;
     //void resizeEvent      (QResizeEvent* evt) override;
     //void mousePressEvent  (QMouseEvent*  evt) override;
-    //void mouseMoveEvent   (QMouseEvent*  evt) override;
-    //void mouseReleaseEvent(QMouseEvent*  evt) override;
     //void keyPressEvent    (QKeyEvent*    evt) override;
     //void wheelEvent       (QWheelEvent*  evt) override;
     //void mouseDoubleClickEvent(QMouseEvent* ) override;
 
 private:
     size_t GetNRightAxes() const;
-    int    ComputeScrCoord(double v, double minV, double maxV, bool horizontal) const;
+    int    ComputeScrCoord(double v, double minV, double maxV, bool horizontal = false) const;
 
 //data:
     std::shared_ptr<RecordingDataModel> m_model;
@@ -84,7 +84,9 @@ private:
     std::vector<bool>         m_curveVisible; // indexed by column, i.e. only for existing curves
 
     std::array<int, eNMARGINS> m_margin;
-    QFont                      m_Font;
+
+    QFont        m_Font;
+    QRubberBand  m_RubberBand;  // to specify zoom-in
 
     bool m_showTooltip  = true;
     bool m_showTitle    = true;
