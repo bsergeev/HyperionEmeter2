@@ -75,9 +75,9 @@ void RecordingDisplayWnd::SetGraphOptions()
             m_Plotter->SetCurveVisible (crvIdx, dlg.GetCurveVisible(crvIdx));
             m_Table->SetColumnVisible  (crvIdx, dlg.GetColumnVisible(crvIdx));
         }
-        //MainWnd::kGraphBkgrColor = dlg.GetBackgroundColor();
-        //MainWnd::kGraphFrameColor = dlg.GetFrameColor();
-        //MainWnd::kGraphGridColor = dlg.GetGridlineColor();
+        RecordingPlotter::kGraphBkgrColor  = dlg.GetBackgroundColor();
+        RecordingPlotter::kGraphFrameColor = dlg.GetFrameColor();
+        RecordingPlotter::kGraphGridColor  = dlg.GetGridlineColor();
 
 
   //      m_Plotter->SetShowTitle(MeasurementRecordingPlotter::kShowTitle = dlg.GetShowTitle());

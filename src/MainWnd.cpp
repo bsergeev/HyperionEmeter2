@@ -10,9 +10,6 @@
 
 // static
 bool   MainWnd::kAskForConfgirmation = true;
-QColor MainWnd::kGraphBkgrColor  = QColor("#F4F4FF");
-QColor MainWnd::kGraphGridColor  = Qt::gray;
-QColor MainWnd::kGraphFrameColor = Qt::black;
 
 MainWnd::MainWnd(QWidget* parent, Qt::WindowFlags flags)
     : QMainWindow(parent, flags)

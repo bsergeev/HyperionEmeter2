@@ -20,6 +20,9 @@
 
 // static
 DefaultBools RecordingPlotter::sCurveVisible{ true };
+QColor       RecordingPlotter::kGraphBkgrColor { "#F4F4FF" };
+QColor       RecordingPlotter::kGraphGridColor { Qt::gray  };
+QColor       RecordingPlotter::kGraphFrameColor{ Qt::black };
 
 //------------------------------------------------------------------------------
 
@@ -250,9 +253,6 @@ size_t RecordingPlotter::GetNRightAxes() const
 //------------------------------------------------------------------------------
 void RecordingPlotter::paintEvent(QPaintEvent*)
 {
-    // <<< DEBUG TMP here
-    const QColor kGraphBkgrColor("#F4F4FF");
-
     AdjustScrMargins();
 
     QPainter painter(viewport());
@@ -702,8 +702,15 @@ void RecordingPlotter::SetCurveVisible(size_t curveIdx, bool visible)
 void RecordingPlotter::ReadSettings()
 {
     static bool alreadyLoaded = false;
-    if (!alreadyLoaded) {
+    if (!alreadyLoaded) 
+    {
         sCurveVisible.loadSettings("curvesVisible");
+
+        QSettings settings;
+        kGraphBkgrColor  = settings.value("Graph/BkgrColor ", kGraphBkgrColor ).toString();
+        kGraphGridColor  = settings.value("Graph/GridColor ", kGraphGridColor ).toString();
+        kGraphFrameColor = settings.value("Graph/FrameColor", kGraphFrameColor).toString();
+
         alreadyLoaded = true;
     }
 }
@@ -712,4 +719,9 @@ void RecordingPlotter::ReadSettings()
 void RecordingPlotter::WriteSettings()
 {
     sCurveVisible.saveSettings("curvesVisible");
+    
+    QSettings settings;
+    settings.setValue("Graph/BkgrColor ", kGraphBkgrColor );
+    settings.setValue("Graph/GridColor ", kGraphGridColor );
+    settings.setValue("Graph/FrameColor", kGraphFrameColor);
 }

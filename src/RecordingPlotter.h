@@ -95,6 +95,10 @@ private:
 public: // statics
     static QString SecondsTxt(double sec);
 
+    static QColor  kGraphBkgrColor;
+    static QColor  kGraphGridColor;
+    static QColor  kGraphFrameColor;
+
 private: // static
     static void ReadSettings();
     static void WriteSettings();

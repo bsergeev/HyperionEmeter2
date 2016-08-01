@@ -63,8 +63,4 @@ private:
 
 //static:
     static bool  kAskForConfgirmation;
-public:
-    static QColor  kGraphBkgrColor;
-    static QColor  kGraphGridColor;
-    static QColor  kGraphFrameColor;
 };

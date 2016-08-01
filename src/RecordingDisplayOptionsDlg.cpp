@@ -147,7 +147,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
         lay01 = new QVBoxLayout(colorsGrpBox);
 
             QHBoxLayout* hLay = new QHBoxLayout();
-            m_BkgrColorBtn = new ColorButton( MainWnd::kGraphBkgrColor, this );
+            m_BkgrColorBtn = new ColorButton( RecordingPlotter::kGraphBkgrColor, this);
             hLay->addWidget(m_BkgrColorBtn);
 
             QLabel* txt = new QLabel( tr("Background color"), this);
@@ -156,7 +156,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
         lay01->addLayout( hLay );
 
             hLay = new QHBoxLayout();
-            m_FrameColorBtn = new ColorButton( MainWnd::kGraphFrameColor, this );
+            m_FrameColorBtn = new ColorButton(RecordingPlotter::kGraphFrameColor, this);
             hLay->addWidget(m_FrameColorBtn);
 
             txt = new QLabel( tr("Frame color"), this);
@@ -165,7 +165,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
         lay01->addLayout( hLay );
 
             hLay = new QHBoxLayout();
-            m_GridlineColorBtn = new ColorButton( MainWnd::kGraphGridColor, this );
+            m_GridlineColorBtn = new ColorButton(RecordingPlotter::kGraphGridColor, this);
             hLay->addWidget(m_GridlineColorBtn);
 
             txt = new QLabel( tr("Gridline color"), this);
@@ -330,7 +330,7 @@ QColor RecordingDisplayOptionsDlg::GetCurveColor(size_t curveIdx) const
 QColor RecordingDisplayOptionsDlg::GetBackgroundColor() const
 {
     return ((m_BkgrColorBtn != nullptr)? m_BkgrColorBtn->GetColor() 
-                                       : MainWnd::kGraphBkgrColor);
+                                       : RecordingPlotter::kGraphBkgrColor);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -338,7 +338,7 @@ QColor RecordingDisplayOptionsDlg::GetBackgroundColor() const
 QColor RecordingDisplayOptionsDlg::GetFrameColor() const
 {
     return ((m_FrameColorBtn != nullptr)? m_FrameColorBtn->GetColor() 
-                                        : MainWnd::kGraphFrameColor);
+                                        : RecordingPlotter::kGraphFrameColor);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -346,7 +346,7 @@ QColor RecordingDisplayOptionsDlg::GetFrameColor() const
 QColor RecordingDisplayOptionsDlg::GetGridlineColor() const
 {
     return ((m_GridlineColorBtn != nullptr)? m_GridlineColorBtn->GetColor() 
-                                           : MainWnd::kGraphGridColor);
+                                           : RecordingPlotter::kGraphGridColor);
 }
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
