@@ -63,7 +63,8 @@ void RecordingDisplayWnd::ResizeTable()
 
 void RecordingDisplayWnd::SetGraphOptions()
 {
-    RecordingDisplayOptionsDlg dlg(true, true, m_dataModel.get(), m_Plotter.get(), m_Table.get(), 0);
+    RecordingDisplayOptionsDlg dlg(true, true, m_dataModel.get(), m_Plotter.get(), m_Table.get(), 0,
+                                   false, RecordingPlotter::sShowTitle, RecordingPlotter::sShowSubTitle);
     if (dlg.exec() == QDialog::Accepted)
     {
         // kShowLegend = dlg.GetShowLegend();
@@ -85,8 +86,8 @@ void RecordingDisplayWnd::SetGraphOptions()
         RecordingPlotter::kGraphGridColor  = dlg.GetGridlineColor();
 
 
-  //      m_Plotter->SetShowTitle(MeasurementRecordingPlotter::kShowTitle = dlg.GetShowTitle());
-        //m_Plotter->SetShowSubTitle(MeasurementRecordingPlotter::kShowSubTitle = dlg.GetShowSubTitle());
+        m_Plotter->SetShowTitle   (RecordingPlotter::sShowTitle = dlg.GetShowTitle());
+        m_Plotter->SetShowSubTitle(RecordingPlotter::sShowSubTitle = dlg.GetShowSubTitle());
 
         //kWindowStyle = (!dlg.IsTableEnabled()) ? kGraphOnly
         //	: (!dlg.IsPlotEnabled()) ? kTableOnly

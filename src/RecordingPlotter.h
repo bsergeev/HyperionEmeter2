@@ -50,6 +50,9 @@ public:
     void AdjustScrMargins();
     void ComputeTicks(int minTickNumber = -1);
 
+    void SetShowTitle   (bool doShow) { sShowTitle    = m_showTitle    = doShow; }
+    void SetShowSubTitle(bool doShow) { sShowSubTitle = m_showSubTitle = doShow; }
+
     // Overrides for QAbstractItemView pure virtual functions . . . . . . . . .
     virtual void scrollTo(const QModelIndex&, ScrollHint = EnsureVisible) override {}
     virtual QModelIndex indexAt(const QPoint& p) const override;
@@ -98,6 +101,8 @@ public: // statics
     static QColor  kGraphBkgrColor;
     static QColor  kGraphGridColor;
     static QColor  kGraphFrameColor;
+    static bool sShowTitle;
+    static bool sShowSubTitle;
 
 private: // static
     static void ReadSettings();

@@ -23,6 +23,8 @@ DefaultBools RecordingPlotter::sCurveVisible{ true };
 QColor       RecordingPlotter::kGraphBkgrColor { "#F4F4FF" };
 QColor       RecordingPlotter::kGraphGridColor { Qt::gray  };
 QColor       RecordingPlotter::kGraphFrameColor{ Qt::black };
+bool         RecordingPlotter::sShowTitle    = true;
+bool         RecordingPlotter::sShowSubTitle = true;
 
 //------------------------------------------------------------------------------
 
@@ -277,8 +279,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         // Title [& sub-title] . . . . . . . . . . . . . . . . . . . . . . . . .
         const QString plotDescription = QString::fromStdString(recording.GetTitle()); //  "Downloaded from RDU/MDU";
         std::stringstream ss;
-        recording.PrintHeader(ss); // <<< DEBUG TBD: check if header is empty
-        const QString plotStats = QString::fromStdString(ss.str());
+        const QString subtitle = QString::fromStdString(recording.GetSubtitle());
         bool title_shown = false;
         if ((title_shown = (m_showTitle && !plotDescription.isEmpty())) == true)
         {
@@ -286,11 +287,11 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
             painter.fillRect(topRect, Qt::white);
             painter.drawText(topRect, Qt::AlignHCenter | Qt::AlignVCenter, plotDescription);
         }
-        if (m_showSubTitle && !plotStats.isEmpty())
+        if (m_showSubTitle && !subtitle.isEmpty())
         {
             QRect topRect(0, (title_shown) ? 1.5*metrics.height() : 0, width(), metrics.height());
             painter.fillRect(topRect, Qt::white);
-            painter.drawText(topRect, Qt::AlignHCenter | Qt::AlignVCenter, plotStats);
+            painter.drawText(topRect, Qt::AlignHCenter | Qt::AlignVCenter, subtitle);
         }
 
 
@@ -547,8 +548,8 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
                     }
 
                     // Draw selection markers
-                    if (selections->isSelected(model->index(row,   0, rootIndex()))
-                     || selections->isSelected(model->index(row, col, rootIndex())))
+                    if (selections->isSelected(model->index((int)row,        0, rootIndex()))
+                     || selections->isSelected(model->index((int)row, (int)col, rootIndex())))
                     {
                         int const D = 6; // <<< DEBUG
                         painter.drawLine(scrX[row] - D, scrY, scrX[row], scrY - D);
@@ -605,11 +606,11 @@ void RecordingPlotter::mouseMoveEvent(QMouseEvent* event)
                     for (size_t i = 0; i < N_add_to_selection; ++i) {
                         for (size_t col = 1; col < N_curves; ++col) {
                             if (m_curveVisible.at(col)) {
-                                QModelIndex index = model->index(row - i, col);
+                                QModelIndex index = model->index((int)(row-i), (int)col);
                                 selection.append(QItemSelectionRange(index, index));
                             }
                         }
-                        QModelIndex index = model->index(row - i, 0);
+                        QModelIndex index = model->index((int)(row-i), 0);
                         selection.append(QItemSelectionRange(index, index));
                     }
                     selectionModel()->select(selection, QItemSelectionModel::SelectCurrent);
@@ -670,7 +671,7 @@ void RecordingPlotter::mouseMoveEvent(QMouseEvent* event)
 
 //------------------------------------------------------------------------------
 
-void RecordingPlotter::mouseReleaseEvent(QMouseEvent *event)
+void RecordingPlotter::mouseReleaseEvent(QMouseEvent*)
 {
     m_RubberBand.hide();
 }
@@ -710,6 +711,8 @@ void RecordingPlotter::ReadSettings()
         kGraphBkgrColor  = settings.value("Graph/BkgrColor ", kGraphBkgrColor ).toString();
         kGraphGridColor  = settings.value("Graph/GridColor ", kGraphGridColor ).toString();
         kGraphFrameColor = settings.value("Graph/FrameColor", kGraphFrameColor).toString();
+        sShowTitle       = settings.value("Graph/showTitle",    sShowTitle   ).toBool();
+        sShowSubTitle    = settings.value("Graph/showSubtitle", sShowSubTitle).toBool();
 
         alreadyLoaded = true;
     }
@@ -724,4 +727,6 @@ void RecordingPlotter::WriteSettings()
     settings.setValue("Graph/BkgrColor ", kGraphBkgrColor );
     settings.setValue("Graph/GridColor ", kGraphGridColor );
     settings.setValue("Graph/FrameColor", kGraphFrameColor);
+    settings.setValue("Graph/showTitle",    sShowTitle   );
+    settings.setValue("Graph/showSubtitle", sShowSubTitle);
 }

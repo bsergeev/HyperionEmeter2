@@ -2,6 +2,7 @@
 #include "SamplePoint.h"
 
 #include <iomanip> // std::setprecision
+#include <sstream>
 
 //------------------------------------------------------------------------------
 Recording::Recording(const std::string& title, std::vector<SamplePoint>&& points)
@@ -139,19 +140,16 @@ bool Recording::MassageData()
         ci.maxV = maxV;
     }
 
-
+    generateDefaultSubtitle();
     return changed;
 }
 //------------------------------------------------------------------------------
-void Recording::PrintHeader(std::ostream& os, bool skipEmpty) const
+void Recording::generateDefaultSubtitle()
 {
     if (m_points.empty()) {
-        os << "Empty recording\n";
-        return;
-    }
-
-    // First, list const series
-    if (skipEmpty) {
+        m_subtitle = "Empty recording";
+    } else {
+        std::stringstream os;
         const SamplePoint& pt0 = m_points.front();
         bool first = true;
         for (size_t i = 1; i < SamplePoint::eNUM_VALUES; ++i) {
@@ -170,7 +168,7 @@ void Recording::PrintHeader(std::ostream& os, bool skipEmpty) const
                 }
             }
         }
-        os << std::endl;
+        m_subtitle = os.str();
     }
 }
 //------------------------------------------------------------------------------

@@ -24,13 +24,16 @@ RecordingDataModel::RecordingDataModel(const Recording& rec, QObject* parent)
     };
 }
 //------------------------------------------------------------------------------
-QColor RecordingDataModel::GetColumnColor(size_t columnIndex) const
-{
+QString RecordingDataModel::GetRecordingTitle()    const { 
+    return QString::fromStdString(m_recording.GetTitle()); 
+}
+QString RecordingDataModel::GetRecordingSubTitle() const { 
+    return QString::fromStdString(m_recording.GetSubtitle()); 
+}
+QColor  RecordingDataModel::GetColumnColor(size_t columnIndex) const {
     return m_curveColor.at(columnIndex % N_COLORS);
 }
-
-void RecordingDataModel::SetColumnColor(size_t columnIndex, const QColor& clr)
-{
+void RecordingDataModel::SetColumnColor(size_t columnIndex, const QColor& clr) {
     m_curveColor.at(columnIndex % N_COLORS) = clr;
 }
 //------------------------------------------------------------------------------

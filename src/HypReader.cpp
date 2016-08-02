@@ -138,7 +138,7 @@ bool HypReader::SaveToFile(const QString& filePath)
         if ((ok = (file.good() && file.is_open())) == true) {
             for (auto& recording : m_recordings) {
                 file << recording.GetTitle() << std::endl;
-                recording.PrintHeader     (file);
+                file << recording.GetSubtitle() << std::endl;
                 recording.PrintColumnNames(file);
                 recording.PrintData       (file);
                 file << std::endl;

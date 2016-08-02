@@ -19,8 +19,8 @@ public:
     virtual QVariant headerData (int section, Qt::Orientation orient, int role) const override;
 
     const Recording& GetRecording() const { return m_recording; }
-    QString GetRecordingTitle()     const { return "Title"; }
-    QString GetRecordingSubTitle()  const { return "Subtitle"; }
+    QString GetRecordingTitle()     const;
+    QString GetRecordingSubTitle()  const;
 
     QColor GetColumnColor(size_t columnIndex) const;
     void   SetColumnColor(size_t columnIndex, const QColor& clr);

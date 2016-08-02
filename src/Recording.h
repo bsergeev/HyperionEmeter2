@@ -26,13 +26,13 @@ public:
     void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
 
 
-    void PrintHeader     (std::ostream& os, bool skipEmpty = true) const;
     void PrintColumnNames(std::ostream& os, bool skipEmpty = true) const;
     void PrintData       (std::ostream& os, bool skipEmpty = true) const;
 
-    std::string GetTitle()  const { return m_title;  }
-    size_t      size()      const { return m_points.size(); }
-    size_t      numColums() const { return m_numHasData;    }
+    std::string GetTitle()    const { return m_title; }
+    std::string GetSubtitle() const { return m_subtitle; }
+    size_t size()      const { return m_points.size(); }
+    size_t numColums() const { return m_numHasData;    }
 
     double           GetValue(size_t row, ColumnIdx col) const;
     const CurveInfo&         GetCurveInfo(ColumnIdx col) const;
@@ -43,7 +43,10 @@ public:
     bool      HasDataOfType  (SamplePoint::ValueIndex t) const;
 
 private:
-    std::string              m_title;
+    void generateDefaultSubtitle();
+ 
+    std::string m_title;
+    std::string m_subtitle;
     std::vector<SamplePoint> m_points;
     std::array<CurveInfo, SamplePoint::eNUM_VALUES> m_curveInfo;
 
