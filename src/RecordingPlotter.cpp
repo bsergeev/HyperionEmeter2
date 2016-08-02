@@ -274,8 +274,8 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
     {
         const Recording& recording = model->GetRecording();
 
-        // Title [& sub-title] . . . . . . . . . . . . . . . . . . . . . . . . . . . 
-        const QString plotDescription = "Downloaded from RDU/MDU";
+        // Title [& sub-title] . . . . . . . . . . . . . . . . . . . . . . . . .
+        const QString plotDescription = QString::fromStdString(recording.GetTitle()); //  "Downloaded from RDU/MDU";
         std::stringstream ss;
         recording.PrintHeader(ss); // <<< DEBUG TBD: check if header is empty
         const QString plotStats = QString::fromStdString(ss.str());
@@ -294,7 +294,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
         }
 
 
-        // Tick values and names . . . . . . . . . . . . . . . . . . . . . . . . . .
+        // Tick values and names . . . . . . . . . . . . . . . . . . . . . . . .
         const size_t N_points = recording.size();
         const size_t N_curves = recording.numColums();
         const ColumnIdx ci0 = ColumnIdx{ 0 };

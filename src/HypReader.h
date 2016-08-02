@@ -30,6 +30,9 @@ public:
     size_t GetNumRecordings() const; // { return m_recordings.size(); }
     const Recording& GetRecording(size_t idx) const;
 
+    Hyperion::DeviceType GetDeviceType() const;
+    int         GetFirmwareVersionX100() const;
+
 signals:
     void SeriesEnded();
     void DownloadFinish(bool success);

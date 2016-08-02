@@ -20,7 +20,7 @@ struct PowerOutAndThrust {
 class Recording 
 {
 public:
-    explicit Recording(std::vector<SamplePoint>&& points);
+    explicit Recording(const std::string& title, std::vector<SamplePoint>&& points);
 
     bool MassageData(); // return whether anything was changed
     void CalculatePropDependentValues(std::function<PowerOutAndThrust(double)> calcCBk);
@@ -30,8 +30,9 @@ public:
     void PrintColumnNames(std::ostream& os, bool skipEmpty = true) const;
     void PrintData       (std::ostream& os, bool skipEmpty = true) const;
 
-    size_t size()      const { return m_points.size(); }
-    size_t numColums() const { return m_numHasData;    }
+    std::string GetTitle()  const { return m_title;  }
+    size_t      size()      const { return m_points.size(); }
+    size_t      numColums() const { return m_numHasData;    }
 
     double           GetValue(size_t row, ColumnIdx col) const;
     const CurveInfo&         GetCurveInfo(ColumnIdx col) const;
@@ -42,6 +43,7 @@ public:
     bool      HasDataOfType  (SamplePoint::ValueIndex t) const;
 
 private:
+    std::string              m_title;
     std::vector<SamplePoint> m_points;
     std::array<CurveInfo, SamplePoint::eNUM_VALUES> m_curveInfo;
 

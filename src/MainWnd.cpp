@@ -162,12 +162,13 @@ void MainWnd::FinishDownload(size_t N_recsDLed)
     } else {
         m_logWindow->AddLine(tr("Downloaded %1 recording%2").arg(N_recsDLed)
                                                             .arg((N_recsDLed > 1)? "s":""));
-        for (size_t i = 0; i < N_recsDLed; ++i) {
-            if (m_reader->GetRecording(i).size() > 0) 
+        for (size_t i = 0; i < N_recsDLed; ++i) 
+        {
+            const Recording& recording = m_reader->GetRecording(i);
+            if (recording.size() > 0) 
             {
-                auto dataModel = std::make_shared<RecordingDataModel>(m_reader->GetRecording(i), this);
+                auto dataModel = std::make_shared<RecordingDataModel>(recording, this);
                 if (auto w = new RecordingDisplayWnd(dataModel, this)) {
-                    w->setWindowTitle(QObject::tr("Recording %1").arg(i + 1));
                     w->setWindowIcon(QIcon(":/images/face-smile.png"));
 
                     m_mdiArea->addSubWindow(w);

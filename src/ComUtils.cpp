@@ -33,10 +33,6 @@ const std::array<uint8_t, 5> DeviceLink::HANDSHAKE_REPLY = {
     0xFE  // MDU : Recording session(s) present, ready for download
 };
 
-const std::array<QString, (size_t)DeviceLink::DeviceType::NUM_TYPES> DeviceLink::DEVICE_NAME = {
-    "UNKNOWN", "LDU", "RDU", "MDU"
-};
-
 //==============================================================================
 class SerialPort
 {
@@ -171,27 +167,27 @@ void DeviceLink::DownloadThreadFn()
 
     bool hasData = false;
     if (handshakeReply == 0xFA) {
-        m_deviceType = DeviceType::MDU;
+        m_deviceType = Hyperion::MDU;
     } else if (handshakeReply == 0xFB) {
-        m_deviceType = DeviceType::LDU;
+        m_deviceType = Hyperion::LDU;
     } else if (handshakeReply == 0xFD) {
-        m_deviceType = DeviceType::RDU;
+        m_deviceType = Hyperion::RDU;
     } else if ((hasData = (handshakeReply == 0xFC)) == true) {
-        m_deviceType = DeviceType::RDU;
+        m_deviceType = Hyperion::RDU;
     } else if ((hasData = (handshakeReply == 0xFE)) == true) {
-        m_deviceType = DeviceType::MDU;
+        m_deviceType = Hyperion::MDU;
     } else {
-        m_deviceType = DeviceType::UNKNOWN;
+        m_deviceType = Hyperion::UNKNOWN_DEVICE;
     }
 
     // Get firmware version
-    if (m_deviceType != DeviceType::UNKNOWN) {
+    if (m_deviceType != Hyperion::UNKNOWN_DEVICE) {
         if (com->write(GET_FIRMWARE_VERSION)) {
             dataVec_t reply(1, 0);
             if (com->read(&reply[0], 1)) {
                 m_firmwareVersionX100 = reply[0];
                 SendMessage(tr("Detected %1 v%2.%3%4 on %5\n")
-                            .arg(DEVICE_NAME[static_cast<size_t>(m_deviceType)])
+                            .arg(Hyperion::DEVICE_NAME[m_deviceType])
                             .arg(m_firmwareVersionX100 / 100)
                             .arg(m_firmwareVersionX100 % 100, 2, 10, QChar('0'))
                             .arg((hasData) ? " with data" : "")
@@ -201,7 +197,7 @@ void DeviceLink::DownloadThreadFn()
     }
  
     if (!hasData) {
-        SendMessage(tr("%1 has no data").arg(DEVICE_NAME[(size_t)m_deviceType]));
+        SendMessage(tr("%1 has no data").arg(Hyperion::DEVICE_NAME[m_deviceType]));
         return; // noting to do
     }
 
@@ -293,27 +289,27 @@ void DeviceLink::ClearThreadFn()
 
     bool hasData = false;
     if (handshakeReply == 0xFA) {
-        m_deviceType = DeviceType::MDU;
+        m_deviceType = Hyperion::MDU;
     } else if (handshakeReply == 0xFB) {
-        m_deviceType = DeviceType::LDU;
+        m_deviceType = Hyperion::LDU;
     } else if (handshakeReply == 0xFD) {
-        m_deviceType = DeviceType::RDU;
+        m_deviceType = Hyperion::RDU;
     } else if ((hasData = (handshakeReply == 0xFC)) == true) {
-        m_deviceType = DeviceType::RDU;
+        m_deviceType = Hyperion::RDU;
     } else if ((hasData = (handshakeReply == 0xFE)) == true) {
-        m_deviceType = DeviceType::MDU;
+        m_deviceType = Hyperion::MDU;
     } else {
-        m_deviceType = DeviceType::UNKNOWN;
+        m_deviceType = Hyperion::UNKNOWN_DEVICE;
     }
 
     // Get firmware version
-    if (m_deviceType != DeviceType::UNKNOWN) {
+    if (m_deviceType != Hyperion::UNKNOWN_DEVICE) {
         if (com->write(GET_FIRMWARE_VERSION)) {
             dataVec_t reply(1, 0);
             if (com->read(&reply[0], 1)) {
                 m_firmwareVersionX100 = reply[0];
                 SendMessage(tr("Detected %1 v%2.%3%4 on %5\n")
-                            .arg(DEVICE_NAME[static_cast<size_t>(m_deviceType)])
+                            .arg(Hyperion::DEVICE_NAME[m_deviceType])
                             .arg(m_firmwareVersionX100 / 100)
                             .arg(m_firmwareVersionX100 % 100, 2, 10, QChar('0'))
                             .arg((hasData) ? " with data" : "")
@@ -323,7 +319,7 @@ void DeviceLink::ClearThreadFn()
     }
  
     if (!hasData) {
-        SendMessage(tr("%1 has no data").arg(DEVICE_NAME[(size_t)m_deviceType]));
+        SendMessage(tr("%1 has no data").arg(Hyperion::DEVICE_NAME[m_deviceType]));
         return; // noting to do
     }
 

@@ -20,6 +20,11 @@ RecordingDisplayWnd::RecordingDisplayWnd(std::shared_ptr<RecordingDataModel> dat
     , m_Plotter(std::make_unique<RecordingPlotter>  (dataModel, this))
     , m_Table  (std::make_unique<RecordingTableView>(dataModel, this))
 {
+    if (RecordingDataModel* const model = m_dataModel.get()) {
+        const Recording& recording = model->GetRecording();
+        setWindowTitle(QString::fromStdString(recording.GetTitle()));
+    }
+
     setBackgroundRole(QPalette::Light);
     setAttribute(Qt::WA_DeleteOnClose);
 

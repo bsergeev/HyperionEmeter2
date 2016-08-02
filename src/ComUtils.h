@@ -26,12 +26,14 @@ class DeviceLink : public QObject
     DeviceLink()                              = delete;
     DeviceLink            (const DeviceLink&) = delete;
     DeviceLink& operator =(const DeviceLink&) = delete;
+
 public:
-    enum class DeviceType {
-        UNKNOWN = 0,
-        LDU, RDU, MDU,
-        NUM_TYPES // the last
-    };
+    //enum class DeviceType {
+    //    UNKNOWN = 0,
+    //    LDU, RDU, MDU,
+    //    NUM_TYPES // the last
+    //};
+
     typedef std::function<void(const QString&)>  MsgToDisplayCbk;
     typedef std::function<void(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>&)> 
                                                  PacketRecvdCbk;
@@ -44,6 +46,9 @@ public:
     void DownloadRecorded(); // returns packets via PacketRecvdCbk
     void ClearRecordings();
     void UploadToDevice(const std::vector<uint8_t>& data);
+
+    Hyperion::DeviceType GetDeviceType() const { return m_deviceType;  }
+    int GetFirmwareVersionX100() const { return m_firmwareVersionX100; }
 
 private:
     void DownloadThreadFn();
@@ -72,7 +77,7 @@ private:
 
     std::vector<QString> m_portNames;
 
-    DeviceType m_deviceType = DeviceType::UNKNOWN;
+    Hyperion::DeviceType m_deviceType = Hyperion::UNKNOWN_DEVICE;
     int m_firmwareVersionX100 = 0; // unknown
 
 //statics const:
@@ -84,8 +89,6 @@ private:
     static const std::array<uint8_t,2> GET_FIRMWARE_VERSION; // "DV" 
 
     static const std::array<uint8_t,5> HANDSHAKE_REPLY;
-
-    static const std::array<QString, (size_t)DeviceType::NUM_TYPES> DEVICE_NAME;
 };
 //------------------------------------------------------------------------------
 

@@ -4,8 +4,9 @@
 #include <iomanip> // std::setprecision
 
 //------------------------------------------------------------------------------
-Recording::Recording(std::vector<SamplePoint>&& points)
-    : m_points(points)
+Recording::Recording(const std::string& title, std::vector<SamplePoint>&& points)
+    : m_title(title)
+    , m_points(points)
 {
     m_hasData.fill(false);  
     m_hasData[SamplePoint::eSeconds] = true; // time is always present

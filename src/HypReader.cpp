@@ -6,8 +6,11 @@
 #include <span.h>  // span
 
 #include <cassert>
+#include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
+#include <sstream>
 
 //static:
 const QString HypReader::BS = QChar(0x10);
@@ -34,7 +37,7 @@ void HypReader::FinishDownload(bool success)
     if (success)
     {
         m_recordings.clear();
-            
+
         for (auto& sessionData : m_downloadedRawData)
         {
             const size_t DATA_SIZE = sessionData.size();
@@ -49,7 +52,21 @@ void HypReader::FinishDownload(bool success)
                                     { &sessionData[recordAddr], static_cast<int64_t>(Hyperion::RECORD_LENGTH) });
             }
 
-            m_recordings.emplace_back(Recording{ std::move(points) });
+            // Compose recording title
+            // Get download time
+            auto t = std::time(nullptr);
+            auto tm = *std::localtime(&t);
+            std::ostringstream timeSS;
+            timeSS << std::put_time(&tm, " on %A %F at %X");
+            
+            const int fwVersion = GetFirmwareVersionX100();
+            const int majV = fwVersion / 100;
+            const int minV = fwVersion % 100;
+            const std::string title = std::string("Recording ") + std::to_string(m_recordings.size()+1)
+                + " downloaded from " + Hyperion::DEVICE_NAME[GetDeviceType()]
+                + " v"+ std::to_string(majV) +"."+ ((minV < 10)? "0":"") + std::to_string(minV)
+                + timeSS.str();
+            m_recordings.emplace_back(title, std::move(points));
             m_recordings.back().MassageData();
         }
         if (!m_recordings.empty() && m_recordings.back().size() == 0) {
@@ -120,6 +137,7 @@ bool HypReader::SaveToFile(const QString& filePath)
         std::ofstream file(filePath.toStdString(), std::ios_base::out);
         if ((ok = (file.good() && file.is_open())) == true) {
             for (auto& recording : m_recordings) {
+                file << recording.GetTitle() << std::endl;
                 recording.PrintHeader     (file);
                 recording.PrintColumnNames(file);
                 recording.PrintData       (file);
@@ -142,9 +160,27 @@ const Recording& HypReader::GetRecording(size_t idx) const
         return m_recordings.at(idx);
     } else {
         assert(!"Invalid recording index");
-        static const Recording error{ std::vector<SamplePoint>() };
+        static const Recording error{ "ERROR", std::vector<SamplePoint>() };
         return error;
     }
+}
+//------------------------------------------------------------------------------
+Hyperion::DeviceType HypReader::GetDeviceType() const
+{ 
+    if (DeviceLink* const device = m_deviceReader.get()) {
+        return device->GetDeviceType();
+    }
+    assert(!"DeviceLink not instantiated");
+    return Hyperion::DeviceType::UNKNOWN_DEVICE;
+}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+int HypReader::GetFirmwareVersionX100() const 
+{ 
+    if (DeviceLink* const device = m_deviceReader.get()) {
+        return device->GetFirmwareVersionX100();
+    }
+    assert(!"DeviceLink not instantiated");
+    return 0; // unknown 
 }
 
 //------------------------------------------------------------------------------
