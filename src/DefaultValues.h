@@ -5,19 +5,21 @@
 
 #include <array>
 
+#include <QColor>
 #include <QSettings>
 #include <QString>
 
 
 template <typename T, typename TReader,
-          size_t   N,
-          typename std::enable_if<std::is_literal_type<T>::value>::type * = nullptr>
+          size_t   N>
+          //typename std::enable_if<std::is_literal_type<T>::value>::type * = nullptr>
 class DefaultValues_t
 {
 public:
-             DefaultValues_t()       noexcept = default;
-    explicit DefaultValues_t(bool v) noexcept { m_vals.fill(v); }
+             DefaultValues_t() = default;
+    explicit DefaultValues_t(const T& v) noexcept { m_vals.fill(v); }
 
+    const std::array<T, N>& GetValues() const { return m_vals;  }
     T  at(size_t idx) const { return m_vals.at(idx); }
     T& at(size_t idx)       { return m_vals.at(idx); }
 
@@ -45,7 +47,7 @@ public:
         settings.beginWriteArray(name, N);
         for (int i = 0; i < N; ++i) {
             settings.setArrayIndex(i);
-            settings.setValue("visible", m_vals.at(i));
+            settings.setValue("v", m_vals.at(i));
         }
         settings.endArray();
     }
@@ -56,7 +58,7 @@ public:
         if (TReader* const reader = static_cast<TReader*>(this)) {
             for (int i = 0; i < size; ++i) {
                 settings.setArrayIndex(i);
-                m_vals.at(i) = reader->loadSetting(settings, "visible");
+                m_vals.at(i) = reader->loadSetting(settings, "v");
             }
         }
         settings.endArray();
@@ -65,7 +67,7 @@ public:
 protected:
     std::array<T, N> m_vals; // indexed by SamplePoint::ValueIndex, i.e. for all curves/columns
 }; // class DefaultValues_t
-
+//------------------------------------------------------------------------------
 
 // bool "specialization" of DefaultValues_t
 template <size_t N>
@@ -79,3 +81,17 @@ public:
     }
 };
 typedef DefaultBools_t<SamplePoint::eNUM_VALUES> DefaultBools;
+
+
+// QColor "specialization" of DefaultValues_t
+template <size_t N>
+class DefaultColor_t : public DefaultValues_t<QColor, DefaultColor_t<N>, N>
+{
+public:
+    DefaultColor_t(QColor v) noexcept : DefaultValues_t(v) {}
+
+    QString loadSetting(QSettings& settings, const QString& name) {
+        return settings.value(name).toString();
+    }
+};
+typedef DefaultColor_t<SamplePoint::eNUM_VALUES> DefaultColors;

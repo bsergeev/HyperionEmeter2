@@ -2,26 +2,32 @@
 
 #include "HypReader.h"
 #include "Recording.h"
+#include "RecordingTableView.h"
+
+DefaultColors RecordingDataModel::sCurveColor{Qt::black};
+//{ std::initializer_list<QColor>{
+//        QColor(Qt::black),
+//        QColor(Qt::blue),
+//        QColor(Qt::red),
+//        QColor(Qt::darkRed),
+//        QColor(Qt::darkCyan),
+//        QColor(Qt::magenta),
+//        QColor(Qt::darkYellow),
+//        QColor(Qt::darkGreen),
+//        QColor(Qt::green),
+//        QColor(Qt::darkBlue),
+//        QColor(Qt::cyan),
+//        QColor(Qt::darkMagenta),
+//        QColor(Qt::yellow),
+//        QColor(Qt::darkBlue),
+//        QColor(Qt::darkCyan),
+//        QColor(Qt::darkGray)}};
 
 RecordingDataModel::RecordingDataModel(const Recording& rec, QObject* parent)
     : QAbstractTableModel(parent)
     , m_recording(rec)
 {
-    m_curveColor = {
-        Qt::black,
-        Qt::blue,
-        Qt::red,
-        Qt::darkRed,
-        Qt::darkCyan,
-        Qt::magenta,
-        Qt::darkYellow,
-        Qt::darkGreen,
-        Qt::green,
-        Qt::darkBlue,
-        Qt::cyan,
-        Qt::darkMagenta,
-        Qt::yellow
-    };
+    m_curveColor = sCurveColor.GetValues();
 }
 //------------------------------------------------------------------------------
 QString RecordingDataModel::GetRecordingTitle()    const { 
@@ -31,10 +37,11 @@ QString RecordingDataModel::GetRecordingSubTitle() const {
     return QString::fromStdString(m_recording.GetSubtitle()); 
 }
 QColor  RecordingDataModel::GetColumnColor(size_t columnIndex) const {
-    return m_curveColor.at(columnIndex % N_COLORS);
+    return m_curveColor.at(columnIndex % m_curveColor.size());
 }
 void RecordingDataModel::SetColumnColor(size_t columnIndex, const QColor& clr) {
-    m_curveColor.at(columnIndex % N_COLORS) = clr;
+    const size_t i = columnIndex % m_curveColor.size();
+    sCurveColor.at(i) = m_curveColor.at(i) = clr;
 }
 //------------------------------------------------------------------------------
 int RecordingDataModel::rowCount(const QModelIndex&) const
@@ -55,11 +62,9 @@ QVariant RecordingDataModel::data(const QModelIndex& index, int role) const
         return int(Qt::AlignCenter | Qt::AlignVCenter);
 
     case Qt::ForegroundRole:
-        //if (m_PlotSettingsMgr) {
-        //    return (crvIdx == kIdxTime || !m_PlotSettingsMgr->GetColorColumns()) ? Qt::black
-        //        : m_PlotSettingsMgr->GetCurveColor(crvIdx);
-        //}
-        //else
+        if (RecordingTableView::sColorColumns)
+            return QVariant(sCurveColor.at(index.column()));
+        else
             return QVariant((int)Qt::black);
 
     case Qt::DisplayRole:
@@ -120,3 +125,37 @@ QVariant RecordingDataModel::headerData(int col, Qt::Orientation orientation, in
     return QVariant::Invalid;
 }
 //------------------------------------------------------------------------------
+//static
+void RecordingDataModel::ReadSettings()
+{
+    static bool alreadyLoaded = false;
+    if (!alreadyLoaded)
+    {
+        sCurveColor.at( 0) = QColor(Qt::black);
+        sCurveColor.at( 1) = QColor(Qt::blue);
+        sCurveColor.at( 2) = QColor(Qt::red);
+        sCurveColor.at( 3) = QColor(Qt::darkRed);
+        sCurveColor.at( 4) = QColor(Qt::darkCyan);
+        sCurveColor.at( 5) = QColor(Qt::magenta);
+        sCurveColor.at( 6) = QColor(Qt::darkYellow);
+        sCurveColor.at( 7) = QColor(Qt::darkGreen);
+        sCurveColor.at( 8) = QColor(Qt::green);
+        sCurveColor.at( 9) = QColor(Qt::darkBlue);
+        sCurveColor.at(10) = QColor(Qt::cyan);
+        sCurveColor.at(11) = QColor(Qt::darkMagenta);
+        sCurveColor.at(12) = QColor(Qt::yellow);
+        sCurveColor.at(13) = QColor(Qt::darkBlue);
+        sCurveColor.at(14) = QColor(Qt::darkCyan);
+        sCurveColor.at(15) = QColor(Qt::darkGray);
+
+        sCurveColor.loadSettings("curveColors");
+
+        alreadyLoaded = true;
+    }
+}
+
+//static
+void RecordingDataModel::WriteSettings()
+{
+    sCurveColor.saveSettings("curveColors");
+}

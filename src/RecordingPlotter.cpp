@@ -25,6 +25,7 @@ QColor       RecordingPlotter::kGraphGridColor { Qt::gray  };
 QColor       RecordingPlotter::kGraphFrameColor{ Qt::black };
 bool         RecordingPlotter::sShowTitle    = true;
 bool         RecordingPlotter::sShowSubTitle = true;
+bool         RecordingPlotter::sShowTooltip  = true;
 
 //------------------------------------------------------------------------------
 
@@ -708,8 +709,8 @@ void RecordingPlotter::ReadSettings()
         sCurveVisible.loadSettings("curvesVisible");
 
         QSettings settings;
-        kGraphBkgrColor  = settings.value("Graph/BkgrColor ", kGraphBkgrColor ).toString();
-        kGraphGridColor  = settings.value("Graph/GridColor ", kGraphGridColor ).toString();
+        kGraphBkgrColor  = settings.value("Graph/BkgrColor",  kGraphBkgrColor ).toString();
+        kGraphGridColor  = settings.value("Graph/GridColor",  kGraphGridColor ).toString();
         kGraphFrameColor = settings.value("Graph/FrameColor", kGraphFrameColor).toString();
         sShowTitle       = settings.value("Graph/showTitle",    sShowTitle   ).toBool();
         sShowSubTitle    = settings.value("Graph/showSubtitle", sShowSubTitle).toBool();

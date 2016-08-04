@@ -103,6 +103,7 @@ public: // statics
     static QColor  kGraphFrameColor;
     static bool sShowTitle;
     static bool sShowSubTitle;
+    static bool sShowTooltip;
 
 private: // static
     static void ReadSettings();

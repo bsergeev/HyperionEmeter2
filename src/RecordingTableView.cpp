@@ -9,6 +9,7 @@
 
 // static
 DefaultBools RecordingTableView::sColumnVisible{ true };
+bool         RecordingTableView::sColorColumns { true };
 
 //------------------------------------------------------------------------------
 RecordingTableView::RecordingTableView(const std::shared_ptr<RecordingDataModel>& model, QWidget* parent)
@@ -93,6 +94,9 @@ void RecordingTableView::ReadSettings()
 {
     static bool alreadyLoaded = false;
     if (!alreadyLoaded) {
+        QSettings settings;
+        sColorColumns = settings.value("Table/colorColumns", sColorColumns).toBool();
+
         sColumnVisible.loadSettings("columnsVisible");
         alreadyLoaded = true;
     }
@@ -101,5 +105,8 @@ void RecordingTableView::ReadSettings()
 //static
 void RecordingTableView::WriteSettings()
 {
+    QSettings settings;
+    settings.setValue("Table/colorColumns ", sColorColumns);
+
     sColumnVisible.saveSettings("columnsVisible");
 }

@@ -30,4 +30,6 @@ private: // static
     static void WriteSettings();
 
     static DefaultBools sColumnVisible;
+public:
+    static bool         sColorColumns;
 };

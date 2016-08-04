@@ -212,6 +212,9 @@ void MainWnd::readSettings()
         }
 
         kAskForConfgirmation = settings.value("ShowInstructions", kAskForConfgirmation).toBool();
+
+        RecordingDataModel::ReadSettings();
+
         alreadyLoaded = true;
     }
 }
@@ -221,4 +224,6 @@ void MainWnd::writeSettings()
     QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
     settings.setValue("geometry", saveGeometry());
     settings.setValue("ShowInstructions", kAskForConfgirmation);
+
+    RecordingDataModel::WriteSettings();
 }

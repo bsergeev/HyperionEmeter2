@@ -68,10 +68,11 @@ void RecordingDisplayWnd::SetGraphOptions()
     if (dlg.exec() == QDialog::Accepted)
     {
         // kShowLegend = dlg.GetShowLegend();
-        //MeasurementRecordingPlotter::kShowTooltip = dlg.GetShowTooltip();
+        RecordingPlotter::sShowTooltip = dlg.GetShowTooltip();
 
         //psMgr.ChangeXAxisType(MeasurementPlotSettingsMgr::kXAxisType = (XAxisType)dlg.GetXAxisType());
-        //psMgr.ChangeColorColumns(MeasurementPlotSettingsMgr::kColorColumns = dlg.GetClrColumns());
+        RecordingTableView::sColorColumns = dlg.GetClrColumns();
+
         const Recording& recording = m_dataModel->GetRecording();
         const size_t N_curves = recording.numColums();
 

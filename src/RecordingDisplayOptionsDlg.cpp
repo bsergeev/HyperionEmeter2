@@ -80,7 +80,7 @@ RecordingDisplayOptionsDlg::RecordingDisplayOptionsDlg( bool showTable, bool sho
             layTable->addWidget(columnGrpBox);
 
             m_ColorColumns = new QCheckBox( tr("Color columns as curves"), this );
-            m_ColorColumns->setChecked(false); // <<< DEBUG TBD  psMgr.GetColorColumns() );
+            m_ColorColumns->setChecked(RecordingTableView::sColorColumns);
             layTable->addWidget(m_ColorColumns);
 
         m_TableGrpBox->setLayout(layTable);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DefaultValues.h"
+
 #include <QAbstractItemModel>
 #include <QString>
 #include <QColor>
@@ -25,9 +27,13 @@ public:
     QColor GetColumnColor(size_t columnIndex) const;
     void   SetColumnColor(size_t columnIndex, const QColor& clr);
 
+//static:
+    static void ReadSettings();
+    static void WriteSettings();
+
 private:
     const Recording& m_recording;
+    std::array<QColor, SamplePoint::eNUM_VALUES> m_curveColor;
 
-    static const size_t N_COLORS = 13;
-    std::array<QColor, N_COLORS> m_curveColor;
+    static DefaultColors sCurveColor;
 };
