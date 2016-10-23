@@ -104,7 +104,7 @@ bool Recording::MassageData()
         SamplePoint& pt = m_points[i];
         const double orig_discharge = pt[SamplePoint::emAh_Out];
         const double& amps = pt[SamplePoint::eAmps];
-        pt[SamplePoint::emAh_Out] = discharged += 0.5*(prev_amps + amps)*dt;
+        pt[SamplePoint::emAh_Out] = discharged += 0.5*(prev_amps + amps)*dt/3.6; // '3.6' to convert to mA*h
         changed |= (orig_discharge != pt[SamplePoint::emAh_Out]);
         prev_amps = amps;
     }

@@ -320,7 +320,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 
         // Draw vertical axes/values/titles . . . . . . . . . . . . . . . . . . .
         const int strPixelHeight = metrics.height();
-        const int tickValueWidth = metrics.width("0.0000");
+        const int tickValueWidth = metrics.width("0.00");// 00");
         const size_t gapX = 4;
         const size_t ticW = 4;
         const size_t N_rAxes = GetNRightAxes();

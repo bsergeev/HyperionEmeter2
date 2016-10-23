@@ -56,6 +56,8 @@ public:
         if (buffer_size > 0) {
             m_port->setReadBufferSize(buffer_size);
         }
+
+        m_port->clear();
     }
 
     bool open() {
