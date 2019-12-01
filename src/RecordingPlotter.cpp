@@ -250,7 +250,7 @@ size_t RecordingPlotter::GetNRightAxes() const
             ++N_visible_curves;
         }
     }
-    const size_t nAxes = 1 + (N_visible_curves > 3)? N_visible_curves-3 : 0;
+    const size_t nAxes = 1 + (N_visible_curves > 3)? (N_visible_curves-3) : 0;
     return nAxes;
 }
 //------------------------------------------------------------------------------
