@@ -57,7 +57,7 @@ set(sources
   "${PROJECT_SOURCE_DIR}/src/CustomWidgets/YesNoDlg.cpp"
 )
 
-find_package(Qt5 COMPONENTS Core Widgets SerialPort OpenGL REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets SerialPort REQUIRED)
 if (NOT Qt5_FOUND)
   message(FATAL_ERROR "Qt5 not found.")
 endif()
@@ -76,8 +76,8 @@ if (WIN32 OR WIN64)
   set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD_REQUIRED ON)
   set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${TARGET_NAME})
   target_compile_options(${TARGET_NAME} PRIVATE /W4 "/permissive-")
-  target_link_libraries(${TARGET_NAME} #project_options
-    Qt5::Widgets Qt5::SerialPort Qt5::OpenGL
+  target_link_libraries(${TARGET_NAME}
+    Qt5::Widgets Qt5::SerialPort
   )
 
   get_target_property(_qmake_executable Qt5::qmake IMPORTED_LOCATION)
