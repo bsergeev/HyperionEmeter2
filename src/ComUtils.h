@@ -18,6 +18,8 @@ QT_USE_NAMESPACE
 
 class SerialPort;
 
+#define val const auto
+
 //------------------------------------------------------------------------------
 class DeviceLink : public QObject
 {
@@ -85,7 +87,7 @@ private:
     static const std::array<uint8_t,1> CONTINUE_DOWNLOAD;    // 0x01
     static const std::array<uint8_t,2> CLEAR_VALUES;         // "DE" - not sure what it does...
     static const std::array<uint8_t,2> CLEAR_MEMORY;         // "DB" 
-    static const std::array<uint8_t,2> GET_FIRMWARE_VERSION; // "DV" 
+    static const std::array<uint8_t,2> GET_FW_VERSION; // "DV" 
 
     static const std::array<uint8_t,5> HANDSHAKE_REPLY;
 };
