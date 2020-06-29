@@ -74,7 +74,7 @@ template <size_t N>
 class DefaultBools_t : public DefaultValues_t<bool, DefaultBools_t<N>, N>
 {
 public:
-    DefaultBools_t(bool v) noexcept : DefaultValues_t(v) {}
+    DefaultBools_t(bool v) noexcept : DefaultValues_t<bool, DefaultBools_t<N>, N>(v) {}
 
     bool loadSetting(QSettings& settings, const QString& name) {
         return settings.value(name).toBool();
@@ -88,7 +88,7 @@ template <size_t N>
 class DefaultColor_t : public DefaultValues_t<QColor, DefaultColor_t<N>, N>
 {
 public:
-    DefaultColor_t(QColor v) noexcept : DefaultValues_t(v) {}
+    DefaultColor_t(QColor v) noexcept : DefaultValues_t<QColor, DefaultColor_t<N>, N>(v) {}
 
     QString loadSetting(QSettings& settings, const QString& name) {
         return settings.value(name).toString();

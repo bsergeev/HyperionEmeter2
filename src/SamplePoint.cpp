@@ -1,7 +1,7 @@
 #include "SamplePoint.h"
 #include "HypReader.h"
 
-#include <span.h>  // gsl::span
+#include <gsl/gsl-lite.hpp> // gsl::span
 
 //static
 const std::array<size_t, SamplePoint::eNUM_VALUES> SamplePoint::sSeriesPrecision = {
@@ -12,7 +12,7 @@ const std::array<const char*, SamplePoint::eNUM_VALUES> SamplePoint::sSeriesName
     "Power In, W", "Power Out, W", "Efficiency, %", "Thrust, N"
 };
 
-SamplePoint::SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data)
+SamplePoint::SamplePoint(const gsl::span<uint8_t>& data)
 {
     assert(data.data() != nullptr);
 

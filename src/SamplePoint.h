@@ -1,8 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <stdint.h>
 
-#include <span.h>        // gsl::span
+#include <gsl/gsl-lite.hpp> // gsl::span
 #include "HypCommands.h" // RECORD_LENGTH
 
 // Utility constexpr function converting a enum class to its underlying type N/U
@@ -17,7 +18,7 @@ constexpr auto ut(E e) noexcept
 
 class SamplePoint {
 public:
-    explicit SamplePoint(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
+    explicit SamplePoint(const gsl::span<uint8_t>& data);
 
     enum ValueIndex {
         eSeconds = 0,

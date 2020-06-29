@@ -7,8 +7,6 @@
 #include <iostream>
 #include <iomanip>
 
-#include <gsl_util.h> // finally
-
 #include <QDebug>
 #include <QThread>
 #include <QtSerialPort/QSerialPort>

@@ -4,7 +4,7 @@
 #include <memory>
 #include <vector>
 
-#include <span.h>       // gsl::span
+#include <gsl/gsl-lite.hpp> // gsl::span
 
 #include <QObject>
 
@@ -45,7 +45,7 @@ private:
     // They emit the data to be processed on UI thread.
     void MarkSeriesEnd();
     void DownloadFinished(bool success);
-    void ReceiveDataChunk(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& data);
+    void ReceiveDataChunk(const gsl::span<uint8_t>& data);
 
 //data:
     std::function<void(const QString&)> m_msgCBck;

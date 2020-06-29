@@ -3,7 +3,7 @@
 
 #include "HypCommands.h" // RECORD_LENGTH
 
-#include <span.h>      // gsl::span
+#include <gsl/gsl-lite.hpp> // gsl::span
 
 #include <array>
 #include <functional>
@@ -34,11 +34,10 @@ public:
     //    NUM_TYPES // the last
     //};
 
-    typedef std::function<void(const QString&)>  MsgToDisplayCbk;
-    typedef std::function<void(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>&)> 
-                                                 PacketRecvdCbk;
-    typedef std::function<void()>                SeriesEndCbk;
-    typedef std::function<void(bool)>            FinishedCbk;
+    typedef std::function<void(const QString&)>            MsgToDisplayCbk;
+    typedef std::function<void(const gsl::span<uint8_t>&)> PacketRecvdCbk;
+    typedef std::function<void()>                          SeriesEndCbk;
+    typedef std::function<void(bool)>                      FinishedCbk;
 
     DeviceLink(MsgToDisplayCbk msgCbk, PacketRecvdCbk packetCbk, 
                SeriesEndCbk seriesEndCbk, FinishedCbk finishCbk);
@@ -58,7 +57,7 @@ private:
     std::unique_ptr<SerialPort> EstablishConnection(size_t& port_idx, uint8_t& handshakeReply);
 
     void SendMessage  (const QString& msg) const { if (m_messageCbk)     m_messageCbk(msg); }
-    void ReceivePacket(const gsl::span<uint8_t, Hyperion::RECORD_LENGTH>& p)const { if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
+    void ReceivePacket(const gsl::span<uint8_t>& p)const { if (m_packetRecvdCbk) m_packetRecvdCbk(p); }
     void SendFinished (bool ok)            const { if (m_finishCbk)      m_finishCbk(ok); }
 
     typedef std::vector<uint8_t> dataVec_t;

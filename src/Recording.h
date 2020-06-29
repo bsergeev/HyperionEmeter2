@@ -4,6 +4,7 @@
 #include "TypeWrapper.h"
 
 #include <array>
+#include <functional>
 #include <iosfwd>
 #include <limits>
 #include <vector>
