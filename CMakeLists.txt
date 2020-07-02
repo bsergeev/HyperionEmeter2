@@ -39,6 +39,7 @@ set(headers
   "${PROJECT_SOURCE_DIR}/src/CustomWidgets/ColorButton.h"
   "${PROJECT_SOURCE_DIR}/src/CustomWidgets/YesNoDlg.h"
   "${PROJECT_SOURCE_DIR}/resources.qrc"
+  "${PROJECT_SOURCE_DIR}/project.rc" # only needed for Windows?
 )
 set(sources 
   "${PROJECT_SOURCE_DIR}/src/ComUtils.cpp"
@@ -65,6 +66,7 @@ endif()
 message(STATUS "-> Qt: ${Qt5_DIR}")
 
 add_executable(${TARGET_NAME} ${sources} ${headers})
+
 target_include_directories(${TARGET_NAME} 
   PRIVATE 
     "${include_dirs}"
