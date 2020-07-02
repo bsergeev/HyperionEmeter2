@@ -69,7 +69,7 @@ void RecordingPlotter::AdjustScrMargins()
 {
     QFontMetrics metrics(m_Font);
     int h = metrics.height();
-    int w = metrics.width("0.0000");
+    int w = metrics.horizontalAdvance("0.0000");
     short const gapX = 4;
 
     QString title;
@@ -320,7 +320,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 
         // Draw vertical axes/values/titles . . . . . . . . . . . . . . . . . . .
         const int strPixelHeight = metrics.height();
-        const int tickValueWidth = metrics.width("0.00");// 00");
+        const int tickValueWidth = metrics.horizontalAdvance("0.00");// 00");
         const size_t gapX = 4;
         const size_t ticW = 4;
         const size_t N_rAxes = GetNRightAxes();
@@ -442,7 +442,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
                     }
 
                     QString valueStr = QString::number(t);
-                    int valueStrWidth = metrics.width(valueStr);
+                    int valueStrWidth = metrics.horizontalAdvance(valueStr);
                     if (MAXvalueStrWidth < valueStrWidth) MAXvalueStrWidth = valueStrWidth;
 
                     // For text inside the plot area, get the bounding rectangle
@@ -464,7 +464,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 
             // Draw the axis title
             const QString txt = recording.SeriesName(colIdx);
-            int strPixelWidth = metrics.width(txt);
+            int strPixelWidth = metrics.horizontalAdvance(txt);
             int yTitle = -height() / 2 + shiftAxisTitle*(strPixelWidth + 2 * gapX);
 
             // Move axes titles closer to the axes, if the values are shorter than anticipated
@@ -488,7 +488,7 @@ void RecordingPlotter::paintEvent(QPaintEvent*)
 
             painter.rotate(-90);
             painter.drawText(yTitle, Xtitle, strPixelWidth, strPixelHeight, Qt::AlignHCenter | Qt::AlignVCenter, txt);
-            painter.resetMatrix();
+            painter.resetTransform();
         } // end of "crvIdx" loop
 
 
@@ -704,8 +704,7 @@ void RecordingPlotter::SetCurveVisible(size_t curveIdx, bool visible)
 void RecordingPlotter::ReadSettings()
 {
     static bool alreadyLoaded = false;
-    if (!alreadyLoaded) 
-    {
+    if (!alreadyLoaded) {
         sCurveVisible.loadSettings("curvesVisible");
 
         QSettings settings;
