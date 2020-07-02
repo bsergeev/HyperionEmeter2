@@ -38,6 +38,7 @@ set(headers
   "${PROJECT_SOURCE_DIR}/src/TypeWrapper.h"
   "${PROJECT_SOURCE_DIR}/src/CustomWidgets/ColorButton.h"
   "${PROJECT_SOURCE_DIR}/src/CustomWidgets/YesNoDlg.h"
+  "${PROJECT_SOURCE_DIR}/resources.qrc"
 )
 set(sources 
   "${PROJECT_SOURCE_DIR}/src/ComUtils.cpp"
